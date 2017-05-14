@@ -62,8 +62,8 @@ class SensorController extends \BaseController
                 'title' => 'Editar Sensor',
                 'authors' => $authors,
                 'GrupoIndicadores' => Base::$_GRUPOINDICADORES_,
+                'DashboardPeriods' => Base::$_DASHBOARD_PERIODS_,
                 'Indicadores' => Base::$_INDICADORES_,
-                'DashboardPeriods' => Base::$_DASHBOARD_PERIODS_
             )
         );
     }
@@ -138,16 +138,21 @@ class SensorController extends \BaseController
     /**
      * Show the form for creating a new resource.
      *
+     * @param  Request $request
      * @param  int $id
      * @return Response
      */
     public function updateDashboard($id)
     {
+        $data = Request::all();
+        foreach ($data['dash_measure'] as $key => $value) {
+            $dashboard[] = array('values' => $value, 'period' => $data['dash_period']);
+        }
         Postmeta::update_or_insert(array('post_id' => $id,
             'key' => 'visualization_dash',
-            'value' => Input::get('visualization_dash'))); //vai ser setado quando o sensor for criado
+            'value' => json_encode($dashboard))); //vai ser setado quando o sensor for criado
         Session::flash('alert-code', 'SEN002S');
-        return Redirect::route('admin.dashboard');
+        return Redirect::route('admin.sensores.show', $id);
 
     }
 
@@ -166,6 +171,7 @@ class SensorController extends \BaseController
         $url = Option::get('url_site') . '/admin/sensores/' . $slug;
 
         $regras = [
+
             'title' => 'required',
             'measures' => 'required',
         ];
@@ -197,7 +203,7 @@ class SensorController extends \BaseController
                 "last_alert" => $agora->format('Y-m-d H:i'),
                 "last_activity" => $agora->format('Y-m-d H:i'),
                 'alerts_count_' . $agora->format('dmY') => 0,
-                "visualization_dash" => 'u1',
+                "visualization_dash" => '[{"values":["laeq"],"period":["u1"]}]',
             );
             $post_id = Post::update_or_insert($vars);
             if ($post_id) {

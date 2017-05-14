@@ -181,9 +181,14 @@
                     </div>
                 </div>
             </div>
+        {{ Form::close() }}
+        @if(isset($sensor->post_id))
             <div class="row">
                 <div class="col-md-12">
                     <!-- START Panel -->
+                    {{ Form::open(['method' => 'POST',
+                        'route'=>['admin.sensores.dashboard',$sensor->post_id],
+                        'data-parsley-validate']) }}
                     <div class="panel panel-default">
                         <div class="panel-heading">
                             <h3 class="panel-title">Dashboard</h3>
@@ -193,8 +198,8 @@
                                 <div class="col-sm-6">
                                     <label for="measures" class="control-label">Indicadores <span
                                                 class="text-danger">*</span></label>
-                                    <select name="dash_measure[]"
-                                            class="form-control graph-select" placeholder="Escolha ..."
+                                    <select name="dash_measure[0][]" id="selectize-selectmultiple"
+                                            class="form-control graph-select" placeholder="Escolha ..." multiple
                                             required>
                                         @foreach($GrupoIndicadores as $grupo)
                                             <option value="{{$grupo['indice']}}">{{$grupo['impressao']}}</option>
@@ -205,20 +210,60 @@
                                     <label for="measures" class="control-label">Período <span
                                                 class="text-danger">*</span></label>
                                     <select name="dash_period[]" class="form-control" placeholder="Visualizar por...">
-
-                                        <option value="0">Hoje</option>
-                                        <option value="u1">Última hora</option>
-                                        <option value="u6">Últimas 6 horas</option>
-                                        <option value="u12">Últimas 12 horas</option>
-                                        <option value="u24">Últimas 24 horas</option>
+                                        @foreach($DashboardPeriods as $period)
+                                            <option value="{{$period['code']}}">{{$period['description']}}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                             </div>
+                            <script>
+                                var IND = 1;
+                                $(document).ready(function () {
+                                    $('a.btn-add').click(function () {
+                                        var $parent = $(this).parents('div.panel-footer').prev();
+                                        var form = '<section><div class="col-sm-6">' +
+                                            '<label for="measures" class="control-label">Indicadores <span class="text-danger">*</span></label>' +
+                                            '<select name="dash_measure[' + IND + '][]" class="form-control graph-select" placeholder="Escolha ..." multiple required>' +
+                                            '<option value="">Selecione</option>';
+                                        @foreach($GrupoIndicadores as $grupo)
+                                            form += '<option value="{{$grupo['indice']}}">{{$grupo['impressao']}}</option>';
+                                        @endforeach
+                                            form += '</select></div>';
+                                        form += '<div class="col-sm-6">' +
+                                            '<label for="measures" class="control-label">Período <span class="text-danger">*</span></label>' +
+                                            '<select name="dash_period[' + IND + ']" class="form-control" placeholder="Visualizar por...">' +
+                                            '<option value="">Selecione</option>';
+                                        @foreach($DashboardPeriods as $period)
+                                            form += '<option value="{{$period['code']}}">{{$period['description']}}</option>';
+                                        @endforeach
+                                            form += '</select></div></div></section>';
+                                        $($parent).append(form);
+
+                                        $($parent).find('section').last().find('select').selectize();
+                                        IND++;
+                                    })
+                                    $('a.btn-rem').click(function () {
+                                        if (IND > 1) IND--;
+                                        var $parent = $(this).parents('div.panel-footer').prev();
+                                        $($parent).find('section').last().remove();
+                                    })
+                                })
+                            </script>
+                        </div>
+                        <div class="panel-footer">
+                            <div class="pull-left">
+                                <a class="btn btn-danger btn-rem"><i class="fa fa-minus"></i> Remover</a>
+                                <a class="btn btn-primary btn-add"><i class="fa fa-plus"></i> Adicionar</a>
+                            </div>
+                            <div class="pull-right">
+                                <button class="btn btn-success"><i class="fa fa-save"></i> Salvar</button>
+                            </div>
                         </div>
                     </div>
+                    {{Form::close()}}
                 </div>
             </div>
-        {{ Form::close() }}
+        @endif
         </div>
         @if(Auth::user()->is_admin() && isset($sensor->post_id))
             <div class="row" style="display: none" id="teste">

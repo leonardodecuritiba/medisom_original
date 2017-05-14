@@ -242,6 +242,11 @@ class Post extends Eloquent
         return $this->belongsTo('User', 'user_id', 'post_author');
     }
 
+    public function autor()
+    {
+        return $this->belongsTo('User', 'post_author', 'user_id');
+    }
+
     public function owner()
     {
         return $this->belongsTo('User', 'post_author', 'user_id');
@@ -265,6 +270,11 @@ class Post extends Eloquent
     public function sensormetas()
     {
         return $this->hasMany('Sensormeta', 'sensor_id', 'post_id');
+    }
+
+    public function dashboards()
+    {
+        return $this->hasMany('Postmeta', 'post_id', 'post_id')->where('meta_key', 'visualization_dash');
     }
 
     public function sensormeta()

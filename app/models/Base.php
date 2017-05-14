@@ -2,23 +2,23 @@
 
 class Base
 {
-    static public $_FILTER_DASHBOARD_TYPES_ = [
-        'h' => 'Hoje',
-        'u1' => 'Última hora',
-        'u6' => 'Últimas 6 horas',
-        'u12' => 'Últimas 12 horas',
-        'u24' => 'Últimas 24 horas',
+    static public $_DASHBOARD_PERIODS_ = [
+        ['code' => 'h', 'description' => 'Hoje'],
+        ['code' => 'u1', 'description' => 'Última Hora'],
+        ['code' => 'u6', 'description' => 'Últimas 6 Horas'],
+        ['code' => 'u12', 'description' => 'Últimas 12 Horas'],
+        ['code' => 'u24', 'description' => 'Últimas 24 Horas'],
 
-        'ha' => 'Hora atual',
+        ['code' => 'ha', 'description' => 'Hora Atual'],
 
-        'da' => 'Dia atual',
-        'u7d' => 'Últimos 7 dias',
-        'u15d' => 'Últimos 15 dias',
-        'm' => 'Desde início do mês',
+        ['code' => 'da', 'description' => 'Dia atual'],
+        ['code' => 'u7d', 'description' => 'Últimos 7 dias'],
+        ['code' => 'u15d', 'description' => 'Últimos 15 dias'],
+        ['code' => 'm', 'description' => 'Desde início do mês'],
 
-        'ma' => 'Mês atual',
-        'u3m' => 'Últimos 3 meses',
-        'aa' => 'Desde início do ano',
+        ['code' => 'ma', 'description' => 'Mês atual'],
+        ['code' => 'u3m', 'description' => 'Últimos 3 meses'],
+        ['code' => 'aa', 'description' => 'Desde início do ano'],
     ];
 
     static public $_ALERT_TYPES_ = [

@@ -174,19 +174,18 @@ class AdminController extends BaseController
     {
 
         if (Auth::user()->group_id == 2) {
-            $sensores = DB::table('posts')->where('type', 'sensor')->where('post_author', Auth::user()->parent)->where('status', 'publish')->get();
+            $sensores = Post::where('type', 'sensor')->where('post_author', Auth::user()->parent)->where('status', 'publish')->get();
         } else if (Auth::user()->group_id == 1) {
-            $sensores = DB::table('posts')->where('type', 'sensor')->where('status', 'publish')->orderBy('post_author', 'desc')->get();
+            $sensores = Post::where('type', 'sensor')->where('status', 'publish')->orderBy('post_author', 'desc')->get();
         } else {
-            $sensores = DB::table('posts')->where('type', 'sensor')->where('post_author', Auth::id())->where('status', 'publish')->get();
+            $sensores = Post::where('type', 'sensor')->where('post_author', Auth::id())->where('status', 'publish')->get();
         }
-
 
         $sms = $this->SMSAPI_initialize();
         $Colors = ReportController::$Colors;
         #$this->SMSAPI_enviar('554888394340', 'Medisom - teste de envio sms');
 
-        $sensores = BaseController::getDataSensors($sensores);
+//        $sensores = BaseController::getDataSensors($sensores);
 //        $sensores = $sensores[0];
 //        return $sensores;
         return View::make('admin.dashboard', array('sensores' => $sensores, 'sms' => $sms, 'Colors' => $Colors));
