@@ -110,12 +110,14 @@
                         </a>
 
                     </li>
-                    <li class="dropdown">
-                        <a href="{{URL::route('login')}}" target="_blank" class="dropdown-toggle dropdown-hover">
-                            <span class="meta">
-                                <span class="text text-primary">ÁREA RESTRITA (CLIENTE)</span>
-                            </span>
+                    <li>
+                        <a href="{{URL::route('login')}}" class="dropdown-toggle dropdown-hover">
+                        <span class="meta">
+                        <span class="text text-primary">ÁREA RESTRITA (CLIENTE)</span>
+
+                        </span>
                         </a>
+
                     </li>
                 </ul>
             </div>

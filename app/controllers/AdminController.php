@@ -188,7 +188,7 @@ class AdminController extends BaseController
 //        $sensores = BaseController::getDataSensors($sensores);
 //        $sensores = $sensores[0];
 //        return $sensores;
-        return View::make('admin.dashboard', array('sensores' => $sensores, 'sms' => $sms, 'Colors' => $Colors));
+        return View::make('admin.dashboard', array('sensores' => $sensores, 'sms' => $sms, 'Colors' => $Colors, 'Indicadores' => Base::$_INDICADORES_));
     }
 
 //    public function alerts($alert_id = 0, $action = '')

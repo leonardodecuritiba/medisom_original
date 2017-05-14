@@ -38,7 +38,8 @@ class SensorController extends \BaseController
         return View::make('admin.sensors.sensors-single',
             array('title' => 'Novo Sensor',
                 'authors' => $authors,
-                'GrupoIndicadores' => Base::$_GRUPOINDICADORES_
+                'DashboardPeriods' => array_slice(Base::$_DASHBOARD_PERIODS_, 0, 5),
+                'Indicadores' => Base::$_INDICADORES_
             )
         );
     }
@@ -61,8 +62,7 @@ class SensorController extends \BaseController
                 'user' => $user,
                 'title' => 'Editar Sensor',
                 'authors' => $authors,
-                'GrupoIndicadores' => Base::$_GRUPOINDICADORES_,
-                'DashboardPeriods' => Base::$_DASHBOARD_PERIODS_,
+                'DashboardPeriods' => array_slice(Base::$_DASHBOARD_PERIODS_, 0, 5),
                 'Indicadores' => Base::$_INDICADORES_,
             )
         );
@@ -146,8 +146,9 @@ class SensorController extends \BaseController
     {
         $data = Request::all();
         foreach ($data['dash_measure'] as $key => $value) {
-            $dashboard[] = array('values' => $value, 'period' => $data['dash_period']);
+            $dashboard[] = array('values' => $value, 'period' => $data['dash_period'][$key]);
         }
+//        return $dashboard;
         Postmeta::update_or_insert(array('post_id' => $id,
             'key' => 'visualization_dash',
             'value' => json_encode($dashboard))); //vai ser setado quando o sensor for criado

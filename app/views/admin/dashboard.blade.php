@@ -106,8 +106,8 @@
             </div>
             <div class="section-body">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    @foreach($sensor->dashboards as $dashboard)
-                        @foreach($dashboard->decodeMetaKey() as $measure)
+                    @if(count($sensor->dashboard->decodeMetaKey()) > 0)
+                        @foreach($sensor->dashboard->decodeMetaKey() as $measure_key => $measure)
                             @if($measure=='ipaporcento')
                                 <script type="text/javascript">
                                     $(document).ready(function () {
@@ -140,37 +140,43 @@
                                         </div>
                                     </div>
                                 </div>
-                            @else
-                                <?php $measures_str = implode(',', $measure->values);?>
-                                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 graph"
-                                     id="widget-{{$sensor->post_id}}">
-                                    <!-- START Widget Panel -->
-                                    <div class="widget panel panel-default">
-                                        <div class="panel-head">
-                                            <div class="widget-tools">
-                                                <a href="{{URL::route('admin.report',array('post_id'=>$sensor->post_id,'type'=>$measures_str))}}"
-                                                   class="pull-right">
-                                                    Ver Detalhes
-                                                </a>
-                                            </div>
+                            @endif
+                            <?php $measures_str = implode(',', $measure->values); ?>
+                            <?php
+                            $measures_name_str = NULL;
+                            foreach ($measure->values as $indicador) {
+                                $measures_name_str[] = $Indicadores[$indicador]['nome'] . " (" . $Indicadores[$indicador]['escala'] . ")";
+                            }
+                            $measures_name_str = (count($measures_name_str) > 1) ? implode('; ', $measures_name_str) : $measures_name_str[0];
+                            ?>
+                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 graph"
+                                 id="widget-{{$sensor->post_id}}">
+                                <!-- START Widget Panel -->
+                                <div class="widget panel panel-default">
+                                    <div class="panel-head">
+                                        <div class="widget-tools">
+                                            <a href="{{URL::route('admin.report',array('post_id'=>$sensor->post_id,'type'=>$measures_str))}}"
+                                               class="pull-right">
+                                                Ver Detalhes
+                                            </a>
                                         </div>
-                                        <!-- panel body -->
-                                        <div class="panel-body">
-                                            <div class="clearfix">
-                                                <p class="pull-left semibold">{{$measures_str}}</p>
-                                                <p class="pull-right semibold"></p>
-                                            </div>
-                                            <div class="text-center mt15 mb15">
-                                                <div id="chart-{{$sensor->post_id}}-{{$measures_str}}"
-                                                     class="charts"
-                                                     data-type="widget"
-                                                     data-last="{{\Carbon\Carbon::now()->format('YmdHis')}}"
-                                                     data-graphid="{{$measures_str}}"
-                                                     data-names="{{$measures_str}}"
-                                                     data-title="{{$measures_str}}"
-                                                     data-postid="{{$sensor->post_id}}"
-                                                     style="height: 150px;background-color: transparent"></div>
-                                            </div>
+                                    </div>
+                                    <!-- panel body -->
+                                    <div class="panel-body">
+                                        <div class="clearfix">
+                                            <p class="pull-left semibold">{{$measures_name_str}}</p>
+                                            <p class="pull-right semibold"></p>
+                                        </div>
+                                        <div class="text-center mt15 mb15">
+                                            <div id="chart-{{$sensor->post_id}}-{{$measures_str}}"
+                                                 class="charts"
+                                                 data-type="widget"
+                                                 data-last="{{\Carbon\Carbon::now()->format('YmdHis')}}"
+                                                 data-graphid="{{$measures_str}}"
+                                                 data-names="{{$measures_str}}"
+                                                 data-title="{{$measures_str}}"
+                                                 data-postid="{{$sensor->post_id}}"
+                                                 style="height: 150px;background-color: transparent"></div>
                                             <div class="clearfix "></div>
                                             <table border="0" class="table table-hover media hide">
                                                 <thead>
@@ -187,18 +193,12 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                @foreach($measure->values as $i => $measure)
-                                                    <?php
-                                                    $indicador = [
-                                                        'indice' => $measure,
-                                                        'escala' => $measure
-                                                    ];
-                                                    ?>
-                                                    <tr id="{{$indicador['indice']}}" class="hide">
+                                                @foreach($measure->values as $i => $indicador)
+                                                    <tr id="{{$indicador}}" class="hide">
                                                         <td>
                                                             <strong>
-                                                                <small style="color:{{$Colors[$i]}}">{{$measure}}
-                                                                    ({{$indicador['escala']}})
+                                                                <small style="color:{{$Colors[$i]}}">{{$Indicadores[$indicador]['nome']}}
+                                                                    ({{$Indicadores[$indicador]['escala']}})
                                                                 </small>
                                                             </strong></td>
                                                         <td>
@@ -211,15 +211,15 @@
                                                         </td>
                                                     </tr>
                                                 @endforeach
+
                                                 </tbody>
                                             </table>
                                         </div>
                                     </div>
-                                    <!--/ END Widget Panel -->
                                 </div>
-                            @endif
+                            </div>
                         @endforeach
-                    @endforeach
+                    @endif
                 </div>
             </div>
     @endforeach

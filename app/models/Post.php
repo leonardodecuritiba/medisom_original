@@ -272,9 +272,9 @@ class Post extends Eloquent
         return $this->hasMany('Sensormeta', 'sensor_id', 'post_id');
     }
 
-    public function dashboards()
+    public function dashboard()
     {
-        return $this->hasMany('Postmeta', 'post_id', 'post_id')->where('meta_key', 'visualization_dash');
+        return $this->hasOne('Postmeta', 'post_id', 'post_id')->where('meta_key', 'visualization_dash');
     }
 
     public function sensormeta()

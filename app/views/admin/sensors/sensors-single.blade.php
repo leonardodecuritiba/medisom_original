@@ -126,9 +126,9 @@
                                     <select name="measures[]" id="selectize-selectmultiple"
                                             class="form-control graph-select" placeholder="Escolha ..." multiple
                                             required>
-                                        @foreach($GrupoIndicadores as $grupo)
-                                            <option value="{{$grupo['indice']}}"
-                                                    {{(isset($sensor->measures) && (in_array($grupo['indice'],$sensor->measures)))? 'selected' :''}}>{{$grupo['impressao']}}</option>
+                                        @foreach($Indicadores as $key => $indicador)
+                                            <option value="{{$key}}"
+                                                    @if(isset($sensor->measures) && (in_array($key,$sensor->measures))) selected @endif>{{$indicador['nome'].' (' . $indicador['escala'] . ')'}}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -194,30 +194,64 @@
                             <h3 class="panel-title">Dashboard</h3>
                         </div>
                         <div class="panel-body">
-                            <div class="form-group">
-                                <div class="col-sm-6">
-                                    <label for="measures" class="control-label">Indicadores <span
-                                                class="text-danger">*</span></label>
-                                    <select name="dash_measure[0][]" id="selectize-selectmultiple"
-                                            class="form-control graph-select" placeholder="Escolha ..." multiple
-                                            required>
-                                        @foreach($GrupoIndicadores as $grupo)
-                                            <option value="{{$grupo['indice']}}">{{$grupo['impressao']}}</option>
-                                        @endforeach
-                                    </select>
+                            @if(count($sensor->dashboard->decodeMetaKey()) > 0)
+                                @foreach($sensor->dashboard->decodeMetaKey() as $measure_key => $measure)
+                                    {{--                                    {{json_encode($measure)}}--}}
+                                    <div class="form-group">
+                                        <div class="col-sm-6">
+                                            <label for="measures" class="control-label">Indicadores <span
+                                                        class="text-danger">*</span></label>
+                                            <select name="dash_measure[{{$measure_key}}][]"
+                                                    id="selectize-selectmultiple"
+                                                    class="form-control graph-select" placeholder="Escolha ..." multiple
+                                                    required>
+                                                @foreach($Indicadores as $key => $indicador)
+                                                    <option value="{{$key}}"
+                                                            @if(in_array($key, $measure->values)) selected @endif>{{$indicador['nome'].' (' . $indicador['escala'] . ')'}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <label for="measures" class="control-label">Período <span
+                                                        class="text-danger">*</span></label>
+                                            <select name="dash_period[{{$measure_key}}]" class="form-control"
+                                                    placeholder="Visualizar por...">
+                                                @foreach($DashboardPeriods as $period)
+                                                    <option value="{{$period['code']}}"
+                                                            @if($measure->period == $period['code']) selected @endif
+                                                    >{{$period['description']}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        <label for="measures" class="control-label">Indicadores <span
+                                                    class="text-danger">*</span></label>
+                                        <select name="dash_measure[0][]" id="selectize-selectmultiple"
+                                                class="form-control graph-select" placeholder="Escolha ..." multiple
+                                                required>
+                                            @foreach($Indicadores as $indicador)
+                                                <option value="{{$indicador['indice']}}">{{$indicador['impressao']}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="measures" class="control-label">Período <span
+                                                    class="text-danger">*</span></label>
+                                        <select name="dash_period[0]" class="form-control"
+                                                placeholder="Visualizar por...">
+                                            @foreach($DashboardPeriods as $period)
+                                                <option value="{{$period['code']}}">{{$period['description']}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <label for="measures" class="control-label">Período <span
-                                                class="text-danger">*</span></label>
-                                    <select name="dash_period[]" class="form-control" placeholder="Visualizar por...">
-                                        @foreach($DashboardPeriods as $period)
-                                            <option value="{{$period['code']}}">{{$period['description']}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
+                            @endif
                             <script>
-                                var IND = 1;
+                                var IND = {{(isset($sensor->dashboard)) ? count($sensor->dashboard->decodeMetaKey()) : 1}};
                                 $(document).ready(function () {
                                     $('a.btn-add').click(function () {
                                         var $parent = $(this).parents('div.panel-footer').prev();
@@ -225,8 +259,9 @@
                                             '<label for="measures" class="control-label">Indicadores <span class="text-danger">*</span></label>' +
                                             '<select name="dash_measure[' + IND + '][]" class="form-control graph-select" placeholder="Escolha ..." multiple required>' +
                                             '<option value="">Selecione</option>';
-                                        @foreach($GrupoIndicadores as $grupo)
-                                            form += '<option value="{{$grupo['indice']}}">{{$grupo['impressao']}}</option>';
+
+                                        @foreach($Indicadores as $key => $indicador)
+                                            form += '<option value="{{$key}}">{{$indicador['nome'].' (' . $indicador['escala'] . ')'}}</option>';
                                         @endforeach
                                             form += '</select></div>';
                                         form += '<div class="col-sm-6">' +
