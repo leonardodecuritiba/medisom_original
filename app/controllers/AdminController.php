@@ -46,6 +46,7 @@ class AdminController extends BaseController
     static public function genPrintableReport($report_id, $token)
     {
         $REPORT = ReportController::genPrintableReport($report_id, $token);
+        return $REPORT['DATA']['data_report'];
         return View::make('admin.report.report-custom-print', array(
             'title' => 'Relatório Agendado',
             'REPORT' => $REPORT));
