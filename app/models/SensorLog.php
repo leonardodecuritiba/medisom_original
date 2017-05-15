@@ -73,7 +73,9 @@ class SensorLog extends Eloquent
                     $timeConf['start'] = $start->format('Y-m-d 00:00:00');
                 } else {
                     $last_day = clone $now;
-                    switch ($sensor->visualization_dash) {
+                    $period = (count($sensor->dashboard) > 0) ? $sensor->dashboard->decodeMetaKey()->period : NULL;
+//                    dd($period);
+                    switch ($period) {
                         case 'u1':
                             $last_day->modify('-1 hour');
                             break;
