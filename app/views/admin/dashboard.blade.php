@@ -97,18 +97,36 @@
     <!--/ END Template Container -->
     @if(isset($sensores) && count($sensores)>0)
         @foreach($sensores as $sensor)
+            <?php
+            $Dashboard = $sensor->dashboard->decodeMetaKey();
+            $num_dashboards = count($Dashboard->values);
+            ?>
             <div class="section-header">
-                <div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 ">
-                    <h5 class="semibold title mb15">
-                        {{$sensor->title}} - {{$sensor->autor->name}}
-                    </h5>
+                <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+                    <div class="col-lg-6 col-md-6 col-sm-8 col-xs-12 ">
+                        <h5 class="semibold title mb15">
+                            {{$sensor->title}} - {{$sensor->autor->name}}
+                        </h5>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-4 col-xs-12 ">
+                        {{Form::open(['route' => ['admin.sensores.period_dashboard',$sensor->post_id], 'id' => 'form-sensors', 'name' => 'form-sensors'])}}
+                        <select name="dash_period" class="form-control"
+                                placeholder="Visualizar por...">
+                            @foreach($DashboardPeriods as $period)
+                                <option value="{{$period['code']}}"
+                                        @if($Dashboard->period == $period['code']) selected @endif
+                                >{{$period['description']}}</option>
+                            @endforeach
+                        </select>
+                        {{Form::close()}}
+                    </div>
                 </div>
             </div>
             <div class="section-body">
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                    @if(count($sensor->dashboard->decodeMetaKey()) > 0)
-                        @foreach($sensor->dashboard->decodeMetaKey() as $measure_key => $measure)
-                            @if($measure=='ipaporcento')
+                    @if($num_dashboards > 0)
+                        @foreach($Dashboard->values as $measure_key => $measures)
+                            @if($measures=='ipaporcento')
                                 <script type="text/javascript">
                                     $(document).ready(function () {
                                         google.setOnLoadCallback(createGauge('{{$sensor->post_id}}'));
@@ -141,10 +159,10 @@
                                     </div>
                                 </div>
                             @endif
-                            <?php $measures_str = implode(',', $measure->values); ?>
                             <?php
+                            $measures_str = implode(',', $measures);
                             $measures_name_str = NULL;
-                            foreach ($measure->values as $indicador) {
+                            foreach ($measures as $indicador) {
                                 $measures_name_str[] = $Indicadores[$indicador]['nome'] . " (" . $Indicadores[$indicador]['escala'] . ")";
                             }
                             $measures_name_str = (count($measures_name_str) > 1) ? implode('; ', $measures_name_str) : $measures_name_str[0];
@@ -193,7 +211,7 @@
                                                 </tr>
                                                 </thead>
                                                 <tbody>
-                                                @foreach($measure->values as $i => $indicador)
+                                                @foreach($measures as $i => $indicador)
                                                     <tr id="{{$indicador}}" class="hide">
                                                         <td>
                                                             <strong>
@@ -235,6 +253,13 @@
 <!-- START Template Footer -->
 @include('admin.parts.footer')
 <!--/ END Template Footer -->
+<script>
+    $(document).ready(function () {
+        $('select[name=dash_period]').change(function () {
+            $(this).parent('form').submit();
+        });
+    });
+</script>
 </body>
 <!--/ END Body -->
 </html>

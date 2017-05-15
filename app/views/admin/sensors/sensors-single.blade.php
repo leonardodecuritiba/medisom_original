@@ -183,6 +183,10 @@
             </div>
         {{ Form::close() }}
         @if(isset($sensor->post_id))
+            <?php
+            $Dashboard = $sensor->dashboard->decodeMetaKey();
+            $num_dashboards = count($Dashboard->values);
+            ?>
             <div class="row">
                 <div class="col-md-12">
                     <!-- START Panel -->
@@ -194,12 +198,28 @@
                             <h3 class="panel-title">Dashboard</h3>
                         </div>
                         <div class="panel-body">
-                            @if(count($sensor->dashboard->decodeMetaKey()) > 0)
-                                @foreach($sensor->dashboard->decodeMetaKey() as $measure_key => $measure)
+                            <div class="col-sm-12">
+                                <label for="measures" class="control-label">Período <span
+                                            class="text-danger">*</span></label>
+                                <select name="dash_period" class="form-control"
+                                        placeholder="Visualizar por...">
+                                    @foreach($DashboardPeriods as $period)
+                                        <option value="{{$period['code']}}"
+                                                @if($Dashboard->period == $period['code']) selected @endif
+                                        >{{$period['description']}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-12">
+                                <hr>
+                            </div>
+                            @if($num_dashboards > 0)
+                                @foreach($Dashboard->values as $measure_key => $measures)
                                     {{--                                    {{json_encode($measure)}}--}}
                                     <div class="form-group">
-                                        <div class="col-sm-6">
-                                            <label for="measures" class="control-label">Indicadores <span
+                                        <div class="col-sm-12">
+                                            <label for="measures" class="control-label">Dashboard ({{$measure_key+1}})
+                                                <span
                                                         class="text-danger">*</span></label>
                                             <select name="dash_measure[{{$measure_key}}][]"
                                                     id="selectize-selectmultiple"
@@ -207,19 +227,7 @@
                                                     required>
                                                 @foreach($Indicadores as $key => $indicador)
                                                     <option value="{{$key}}"
-                                                            @if(in_array($key, $measure->values)) selected @endif>{{$indicador['nome'].' (' . $indicador['escala'] . ')'}}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <label for="measures" class="control-label">Período <span
-                                                        class="text-danger">*</span></label>
-                                            <select name="dash_period[{{$measure_key}}]" class="form-control"
-                                                    placeholder="Visualizar por...">
-                                                @foreach($DashboardPeriods as $period)
-                                                    <option value="{{$period['code']}}"
-                                                            @if($measure->period == $period['code']) selected @endif
-                                                    >{{$period['description']}}</option>
+                                                            @if(in_array($key, $measures)) selected @endif>{{$indicador['nome'].' (' . $indicador['escala'] . ')'}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -227,8 +235,8 @@
                                 @endforeach
                             @else
                                 <div class="form-group">
-                                    <div class="col-sm-6">
-                                        <label for="measures" class="control-label">Indicadores <span
+                                    <div class="col-sm-12">
+                                        <label for="measures" class="control-label">Dashboard (1)<span
                                                     class="text-danger">*</span></label>
                                         <select name="dash_measure[0][]" id="selectize-selectmultiple"
                                                 class="form-control graph-select" placeholder="Escolha ..." multiple
@@ -238,49 +246,32 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="col-sm-6">
-                                        <label for="measures" class="control-label">Período <span
-                                                    class="text-danger">*</span></label>
-                                        <select name="dash_period[0]" class="form-control"
-                                                placeholder="Visualizar por...">
-                                            @foreach($DashboardPeriods as $period)
-                                                <option value="{{$period['code']}}">{{$period['description']}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
                                 </div>
                             @endif
                             <script>
-                                var IND = {{(isset($sensor->dashboard)) ? count($sensor->dashboard->decodeMetaKey()) : 1}};
+                                var IND = {{(isset($sensor->dashboard)) ? $num_dashboards : 1}};
                                 $(document).ready(function () {
                                     $('a.btn-add').click(function () {
                                         var $parent = $(this).parents('div.panel-footer').prev();
-                                        var form = '<section><div class="col-sm-6">' +
-                                            '<label for="measures" class="control-label">Indicadores <span class="text-danger">*</span></label>' +
+                                        var form = '<div class="form-group"><div class="col-sm-12">' +
+                                            '<label for="measures" class="control-label">Dashboard (' + (IND + 1) + ') <span class="text-danger">*</span></label>' +
                                             '<select name="dash_measure[' + IND + '][]" class="form-control graph-select" placeholder="Escolha ..." multiple required>' +
                                             '<option value="">Selecione</option>';
-
                                         @foreach($Indicadores as $key => $indicador)
                                             form += '<option value="{{$key}}">{{$indicador['nome'].' (' . $indicador['escala'] . ')'}}</option>';
                                         @endforeach
-                                            form += '</select></div>';
-                                        form += '<div class="col-sm-6">' +
-                                            '<label for="measures" class="control-label">Período <span class="text-danger">*</span></label>' +
-                                            '<select name="dash_period[' + IND + ']" class="form-control" placeholder="Visualizar por...">' +
-                                            '<option value="">Selecione</option>';
-                                        @foreach($DashboardPeriods as $period)
-                                            form += '<option value="{{$period['code']}}">{{$period['description']}}</option>';
-                                        @endforeach
-                                            form += '</select></div></div></section>';
+                                            form += '</select></div></div>';
                                         $($parent).append(form);
 
-                                        $($parent).find('section').last().find('select').selectize();
+                                        $($parent).find('div.form-group').last().find('select').selectize();
                                         IND++;
                                     })
                                     $('a.btn-rem').click(function () {
-                                        if (IND > 1) IND--;
-                                        var $parent = $(this).parents('div.panel-footer').prev();
-                                        $($parent).find('section').last().remove();
+                                        if (IND > 1) {
+                                            IND--;
+                                            var $parent = $(this).parents('div.panel-footer').prev();
+                                            $($parent).find('div.form-group').last().remove();
+                                        }
                                     })
                                 })
                             </script>

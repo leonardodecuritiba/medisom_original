@@ -145,16 +145,35 @@ class SensorController extends \BaseController
     public function updateDashboard($id)
     {
         $data = Request::all();
+        $dashboard['period'] = $data['dash_period'];
         foreach ($data['dash_measure'] as $key => $value) {
-            $dashboard[] = array('values' => $value, 'period' => $data['dash_period'][$key]);
+            $dashboard['values'][] = $value;
         }
-//        return $dashboard;
+
         Postmeta::update_or_insert(array('post_id' => $id,
             'key' => 'visualization_dash',
             'value' => json_encode($dashboard))); //vai ser setado quando o sensor for criado
         Session::flash('alert-code', 'SEN002S');
         return Redirect::route('admin.sensores.show', $id);
+    }
 
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @param  Request $request
+     * @param  int $id
+     * @return Response
+     */
+    public function updatePeriodDashboard($id)
+    {
+        $data = Request::all();
+        $Postmeta = Postmeta::get_by($id, 'visualization_dash');
+        $dashboard = json_decode($Postmeta->meta_value);
+        $dashboard->period = $data['dash_period'];
+        $Postmeta->meta_value = json_encode($dashboard);
+        $Postmeta->save();
+        Session::flash('alert-code', 'SEN002S');
+        return Redirect::route('admin.dashboard');
     }
 
     /**

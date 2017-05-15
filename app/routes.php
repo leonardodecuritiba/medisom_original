@@ -54,6 +54,7 @@ Route::group(array('before' => 'auth'), function () {
         Route::resource('sensores', 'SensorController');
         Route::patch('sensores/{sensores}', array('as' => 'admin.sensores.update', 'uses' => 'SensorController@update'));
         Route::post('dashboard/sensores/{id}', array('as' => 'admin.sensores.dashboard', 'uses' => 'SensorController@updateDashboard'));
+        Route::post('dashboard/period/{id}', array('as' => 'admin.sensores.period_dashboard', 'uses' => 'SensorController@updatePeriodDashboard'));
         Route::get('clear/sensores/{id}', array('as' => 'admin.sensores.clear', 'uses' => 'SensorController@clearSensorLog'));
         Route::get('status/sensores/{id}', array('as' => 'admin.sensores.status', 'uses' => 'SensorController@changeStatus'));
         Route::post('test/sensores/{id}', array('as' => 'admin.sensores.test_sensor', 'uses' => 'SensorController@testSensor'));
