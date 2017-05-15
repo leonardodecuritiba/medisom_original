@@ -126,19 +126,27 @@
                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                     @if($num_dashboards > 0)
                         @foreach($Dashboard->values as $measure_key => $measures)
-                            @if($measures=='ipaporcento')
+                            <?php
+                            $measures_str = implode(',', $measures);
+                            $measures_name_str = NULL;
+                            foreach ($measures as $indicador) {
+                                $measures_name_str[] = $Indicadores[$indicador]['nome'] . " (" . $Indicadores[$indicador]['escala'] . ")";
+                            }
+                            $measures_name_str = (count($measures_name_str) > 1) ? implode('; ', $measures_name_str) : $measures_name_str[0];
+                            ?>
+                            @if($measures_str=='ipaporcento')
                                 <script type="text/javascript">
                                     $(document).ready(function () {
                                         google.setOnLoadCallback(createGauge('{{$sensor->post_id}}'));
                                         setInterval('updateGauge("{{$sensor->post_id}}")', 60000);
                                     });
                                 </script>
-                                <div class="col-lg-4 col-md-6 col-sm-12 col-xs-12 graph"
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 graph"
                                      id="widget-{{$sensor->post_id}}">
                                     <div class="widget panel panel-default">
                                         <div class="panel-head">
                                             <div class="widget-tools">
-                                                <a href="{{URL::route('admin.report',array('post_id'=>$sensor->post_id,'type'=>$indicator))}}"
+                                                <a href="{{URL::route('admin.report',array('post_id'=>$sensor->post_id,'type'=>$measures_str))}}"
                                                    class="pull-right">
                                                     Ver Detalhes
                                                 </a>
@@ -146,8 +154,7 @@
                                         </div>
                                         <div class="panel-body">
                                             <div class="clearfix">
-                                                <p class="pull-left semibold">{{$indicator}} ({{$indicator}}
-                                                    )</p>
+                                                <p class="pull-left semibold">{{$measures_name_str}}</p>
                                                 <p class="pull-right semibold">
                                                 </p>
                                             </div>
@@ -158,84 +165,77 @@
                                         </div>
                                     </div>
                                 </div>
-                            @endif
-                            <?php
-                            $measures_str = implode(',', $measures);
-                            $measures_name_str = NULL;
-                            foreach ($measures as $indicador) {
-                                $measures_name_str[] = $Indicadores[$indicador]['nome'] . " (" . $Indicadores[$indicador]['escala'] . ")";
-                            }
-                            $measures_name_str = (count($measures_name_str) > 1) ? implode('; ', $measures_name_str) : $measures_name_str[0];
-                            ?>
-                            <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 graph"
-                                 id="widget-{{$sensor->post_id}}">
-                                <!-- START Widget Panel -->
-                                <div class="widget panel panel-default">
-                                    <div class="panel-head">
-                                        <div class="widget-tools">
-                                            <a href="{{URL::route('admin.report',array('post_id'=>$sensor->post_id,'type'=>$measures_str))}}"
-                                               class="pull-right">
-                                                Ver Detalhes
-                                            </a>
+                            @else
+                                <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12 graph"
+                                     id="widget-{{$sensor->post_id}}">
+                                    <!-- START Widget Panel -->
+                                    <div class="widget panel panel-default">
+                                        <div class="panel-head">
+                                            <div class="widget-tools">
+                                                <a href="{{URL::route('admin.report',array('post_id'=>$sensor->post_id,'type'=>$measures_str))}}"
+                                                   class="pull-right">
+                                                    Ver Detalhes
+                                                </a>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <!-- panel body -->
-                                    <div class="panel-body">
-                                        <div class="clearfix">
-                                            <p class="pull-left semibold">{{$measures_name_str}}</p>
-                                            <p class="pull-right semibold"></p>
-                                        </div>
-                                        <div class="text-center mt15 mb15">
-                                            <div id="chart-{{$sensor->post_id}}-{{$measures_str}}"
-                                                 class="charts"
-                                                 data-type="widget"
-                                                 data-last="{{\Carbon\Carbon::now()->format('YmdHis')}}"
-                                                 data-graphid="{{$measures_str}}"
-                                                 data-names="{{$measures_str}}"
-                                                 data-title="{{$measures_str}}"
-                                                 data-postid="{{$sensor->post_id}}"
-                                                 style="height: 150px;background-color: transparent"></div>
-                                            <div class="clearfix "></div>
-                                            <table border="0" class="table table-hover media hide">
-                                                <thead>
-                                                <tr>
-                                                    <th>
-                                                        <small>Indicador</small>
-                                                    </th>
-                                                    <th><i class="ico-arrow-down5"></i>
-                                                        <small>Mínimo</small>
-                                                    </th>
-                                                    <th><i class="ico-arrow-up5"></i>
-                                                        <small>Máximo</small>
-                                                    </th>
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                @foreach($measures as $i => $indicador)
-                                                    <tr id="{{$indicador}}" class="hide">
-                                                        <td>
-                                                            <strong>
-                                                                <small style="color:{{$Colors[$i]}}">{{$Indicadores[$indicador]['nome']}}
-                                                                    ({{$Indicadores[$indicador]['escala']}})
-                                                                </small>
-                                                            </strong></td>
-                                                        <td>
-                                                            <strong class="semibold min"
-                                                                    title="Mínima"></strong>
-                                                        </td>
-                                                        <td>
-                                                            <strong class="semibold nm max"
-                                                                    title="Máxima"></strong>
-                                                        </td>
+                                        <!-- panel body -->
+                                        <div class="panel-body">
+                                            <div class="clearfix">
+                                                <p class="pull-left semibold">{{$measures_name_str}}</p>
+                                                <p class="pull-right semibold"></p>
+                                            </div>
+                                            <div class="text-center mt15 mb15">
+                                                <div id="chart-{{$sensor->post_id}}-{{$measures_str}}"
+                                                     class="charts"
+                                                     data-type="widget"
+                                                     data-last="{{\Carbon\Carbon::now()->format('YmdHis')}}"
+                                                     data-graphid="{{$measures_str}}"
+                                                     data-names="{{$measures_str}}"
+                                                     data-title="{{$measures_str}}"
+                                                     data-postid="{{$sensor->post_id}}"
+                                                     style="height: 150px;background-color: transparent"></div>
+                                                <div class="clearfix"></div>
+                                                <table border="0" class="table table-hover media hide">
+                                                    <thead>
+                                                    <tr>
+                                                        <th>
+                                                            <small>Indicador</small>
+                                                        </th>
+                                                        <th><i class="ico-arrow-down5"></i>
+                                                            <small>Mínimo</small>
+                                                        </th>
+                                                        <th><i class="ico-arrow-up5"></i>
+                                                            <small>Máximo</small>
+                                                        </th>
                                                     </tr>
-                                                @endforeach
+                                                    </thead>
+                                                    <tbody>
+                                                    @foreach($measures as $i => $indicador)
+                                                        <tr id="{{$indicador}}" class="hide">
+                                                            <td>
+                                                                <strong>
+                                                                    <small style="color:{{$Colors[$i]}}">{{$Indicadores[$indicador]['nome']}}
+                                                                        ({{$Indicadores[$indicador]['escala']}})
+                                                                    </small>
+                                                                </strong></td>
+                                                            <td>
+                                                                <strong class="semibold min"
+                                                                        title="Mínima"></strong>
+                                                            </td>
+                                                            <td>
+                                                                <strong class="semibold nm max"
+                                                                        title="Máxima"></strong>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
 
-                                                </tbody>
-                                            </table>
+                                                    </tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            @endif
                         @endforeach
                     @endif
                 </div>

@@ -1,3 +1,9 @@
+function genLog(text) {
+    var debug = 0;
+    if (debug) {
+        console.log(text);
+    }
+}
 function generateChartData(post_id, names) {
     console.log('generateChartData():');
     $.each(names, function (i, name) {
@@ -10,7 +16,8 @@ function generateChartData(post_id, names) {
          */
         console.log(Ajax.json_url + '/SensorLog/charts/?type=media&name=' + name + '&post_id=' + post_id);
         $.getJSON(Ajax.json_url + '/SensorLog/charts/?type=media&name=' + name + '&post_id=' + post_id, function (media) {
-            console.log(media);
+            genLog(media);
+
             $media = $('#widget-' + post_id + ' table.media tr#' + name);
             if (media.min != '-') {
                 $($media).removeClass('hide');
@@ -68,7 +75,8 @@ if ($('body').find(".charts")) {
                     chart.dateFormats = {period: 'mm', format: 'JJ:NN'};
 
                     console.log('chart.dataProvider');
-                    console.log(chart.dataProvider);
+                    genLog(chart.dataProvider);
+
                     var val = ($(chart.dataProvider).get(-1).date).replace(' ', '').replace(/\-/g, '').replace(/\:/g, '');
 
                     console.log(val);//atribuir o último momento aqui!
@@ -122,7 +130,7 @@ if ($('body').find(".charts")) {
                     $.getJSON(Ajax.json_url + '/SensorLog/charts/?type=add&base=' + data_names + '&post_id=' + post_id + '&start=' + $("div.container-fluid").find("div[id='chart-" + post_id + "-" + data_names + "']").data('last'), function (result) {
                         console.log('chart.dataProvider.shift()');
                         console.log(Ajax.json_url + '/SensorLog/charts/?type=add&base=' + data_names + '&post_id=' + post_id + '&start=' + $("div.container-fluid").find("div[id='chart-" + post_id + "-" + data_names + "']").data('last'));
-                        console.log(result);
+                        genLog(result);
                         if (result.status == 1) {
                             chart.dataProvider.shift();
                             resultData = $(result.response).last()[0];

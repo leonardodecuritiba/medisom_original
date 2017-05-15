@@ -246,6 +246,11 @@ class Postmeta extends Eloquent
         return $PostmetaORIG;
     }
 
+    public function decodeMetaKey()
+    {
+        return json_decode($this->meta_value);
+    }
+
     public function post()
     {
         return $this->belongsTo('Post', 'post_id', 'post_id');
