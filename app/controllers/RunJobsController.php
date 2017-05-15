@@ -39,7 +39,6 @@ class RunJobsController extends BaseController
             print_r("___________________________________________________________<br><br>");
         }
 
-        $ids_report = [157];
         foreach ($ids_report as $report_id) {
 //            $report_id = $ids_report[2];
             print_r("<br>report_id = " . $report_id . "<br>");
