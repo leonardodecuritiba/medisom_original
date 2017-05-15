@@ -70,26 +70,26 @@ class Base
             'max' => 30,
         ],
         'temp' => [
-            'min' => 0,
-            'max' => 50,
+            'min' => 0.0,
+            'max' => 50.0,
         ],
         'umid' => [
-            'min' => 0,
-            'max' => 100,
+            'min' => 0.0,
+            'max' => 100.0,
         ],
         'ilum' => [
-            'min' => 0,
-            'max' => 65000,
+            'min' => 0.0,
+            'max' => 65000.0,
         ],
         'temp_i' => [
-            'min' => -55,
-            'max' => 125,
+            'min' => -55.0,
+            'max' => 125.0,
         ],
 
         //NOVOS INDICADORES
         'ipaporcento' => [
-            'min' => 0,
-            'max' => 100,
+            'min' => 0.0,
+            'max' => 100.0,
         ],
 
         //NOVOS INDICADORES
@@ -110,13 +110,13 @@ class Base
             'max' => 25000,
         ],
         'water' => [
-            'min' => 0,
-            'max' => 30,
+            'min' => 0.0,
+            'max' => 30.0,
         ],
 
         'default' => [
-            'min' => 30,
-            'max' => 130,
+            'min' => 30.0,
+            'max' => 130.0,
         ]
     ];
 
@@ -188,7 +188,7 @@ class Base
         [
             'indicadores' => ['alarm_set'],
             'indice' => 'alarm_set',
-            'impressao' => 'Alame Set',
+            'impressao' => 'Alarme Set',
             'filtros_dashboard' => ['h', 'u1', 'u6', 'u12', 'u24'],
             'colors' => ["#ff7f0e"],
             'bullets' => ["triangleDown"],
@@ -310,7 +310,7 @@ class Base
         [
             'indicadores' => ['time_leq', 'alarm_set', 'ipa'],
             'indice' => 'time_leq,alarm_set,ipa',
-            'impressao' => 'Tempo de Leq x Alame Set x IPA',
+            'impressao' => 'Tempo de Leq x Alarme Set x IPA',
             'filtros_dashboard' => ['h', 'u1', 'u6', 'u12', 'u24'],
             'colors' => ["#8c564b", "#ff7f0e", "#ffbb78"],
             'bullets' => ["triangleUp", "triangleDown", "bubble"],
@@ -326,7 +326,7 @@ class Base
         [
             'indicadores' => ['lceq', 'alarm_set', 'ipa'],
             'indice' => 'lceq,alarm_set,ipa',
-            'impressao' => 'Nível de Pressão Sonora Médio x Alame Set x IPA',
+            'impressao' => 'Nível de Pressão Sonora Médio x Alarme Set x IPA',
             'filtros_dashboard' => ['h', 'u1', 'u6', 'u12', 'u24'],
             'colors' => ["#FCD202", "#ff7f0e", "#ffbb78"],
             'bullets' => ["square", "triangleDown", "bubble"],
@@ -334,16 +334,16 @@ class Base
         [
             'indicadores' => ['lceq', 'alarm_set', 'ipa', 'ipaporcento'],
             'indice' => 'lceq,alarm_set,ipa,ipaporcento',
-            'impressao' => 'Nível de Pressão Sonora Médio x Alame Set x IPA x Percentual Acima do Limite',
+            'impressao' => 'Nível de Pressão Sonora Médio x Alarme Set x IPA x Percentual Acima do Limite',
             'filtros_dashboard' => ['h', 'u1', 'u6', 'u12', 'u24'],
             'colors' => ["#FCD202", "#ff7f0e", "#ffbb78", "#7f7f7f"],
             'bullets' => ["square", "triangleDown", "bubble", "triangleUp"],
         ],
-//        Nível de Pressão Sonora Médio; Alame Set; IPA; Percentual Acima do Limite - See more at: http://medisom.com.br/admin/relatorio-customizado#sthash.JDDDurkM.dpuf
+//        Nível de Pressão Sonora Médio; Alarme Set; IPA; Percentual Acima do Limite - See more at: http://medisom.com.br/admin/relatorio-customizado#sthash.JDDDurkM.dpuf
         [
             'indicadores' => ['lamax', 'alarm_set', 'ipa'],
             'indice' => 'lamax,alarm_set,ipa',
-            'impressao' => 'Nível de Pressão Sonora Pico x Alame Set x IPA',
+            'impressao' => 'Nível de Pressão Sonora Pico x Alarme Set x IPA',
             'filtros_dashboard' => ['h', 'u1', 'u6', 'u12', 'u24'],
             'colors' => ["#1f77b4", "#ff7f0e", "#ffbb78"],
             'bullets' => ["triangleUp", "triangleDown", "bubble"],

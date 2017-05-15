@@ -3,7 +3,10 @@
 $REPORT_OPTIONS = $REPORT['OPTIONS'];
 $REPORT_PDF = $REPORT['PDF'];
 $REPORT_DATA = $REPORT['DATA'];
-
+//echo "<pre>";
+//print_r($REPORT_DATA['data_report']);
+//echo "</pre>";
+//exit;
 ?>
         <!DOCTYPE html>
 <html class="backend">

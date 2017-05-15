@@ -84,8 +84,8 @@ Route::group(array('before' => 'auth'), function () {
 
 //************************************************************ SCHEDULE JOBS ************************************************************
 Route::group(['prefix' => 'cronjobs'], function () {
-    Route::get('verify-alerts-run', array('as' => 'verify-alerts-run', 'uses' => 'AdminController@run_alert_check')); //http://medisom.com.br/cronjobs/verify-alerts-run
-    Route::get('verify-reports-run', array('as' => 'verify-reports-run', 'uses' => 'AdminController@run_report_check')); //http://medisom.com.br/cronjobs/verify-reports-run
+    Route::get('verify-alerts-run', array('as' => 'verify-alerts-run', 'uses' => 'RunJobsController@run_alert_check')); //http://medisom.com.br/cronjobs/verify-alerts-run
+    Route::get('verify-reports-run', array('as' => 'verify-reports-run', 'uses' => 'RunJobsController@run_report_check')); //http://medisom.com.br/cronjobs/verify-reports-run
 });
 
 //************************************************************ Ajax Request ************************************************************

@@ -497,7 +497,11 @@ class ReportController extends BaseController
                     ];
 
                     if ($this->debug == 1) print_r("-----------------JSONreport------------------------------<br>");
-                    if ($this->debug == 1) print_r($JSONreport);
+                    if ($this->debug == 1) {
+                        echo '<pre>';
+                        print_r($JSONreport);
+                        echo '</pre>';
+                    }
                     if ($this->debug == 1) print_r("---------------------------------------------------------------<br>");
                     $retorno = 1;
                     //retorna o reports_id e o token para ser enviado por email
@@ -799,7 +803,7 @@ class ReportController extends BaseController
     function contagem($total_rows, $the_query)
     {
         if ($this->debug == 1) print_r("---------------------------------------------------------------<br>");
-        if ($this->debug == 1) print_r(" ---------------------- contagem() ------------------------<br>");
+        if ($this->debug == 1) print_r(" ---------------------- contagem() --------------------------<br>");
         if ($this->debug == 1) print_r("---------------------------------------------------------------<br>");
 
         $per_batch = $this->PER_BATCH;
@@ -878,7 +882,8 @@ class ReportController extends BaseController
                                 if ($this->debug == 3) echo 'indicador: ' . $indicador . '; min: ' . $min . '; max: ' . $max . '; valor: ' . $valor . '<br>';
 
                                 //aqui vão os valores que estão dentro do range, se estiverem fora não irão ser somados,
-                                if (($valor > $min) && ($valor < $max)) {
+                                if (($valor >= $min) && ($valor <= $max)) {
+                                    if ($this->debug == 3) echo '*vai*<br>';
                                     if (!in_array($indicador, $this->not_mlog)) {
                                         $this->vetor_datas[$ivet]["valores"][$i]['valor'] += pow(10, ($valor / 10));
                                         $this->vetor_datas[$ivet]["valores"][$i]['cont']++;
@@ -897,13 +902,10 @@ class ReportController extends BaseController
         //SÓ MOSTRAR
         if ($this->debug == 2) {
             print_r("-------------------------------------------------------------------------------------------<br>");
-            foreach ($this->vetor_datas as $ivet => $dia_cont) {
-                echo '[' . $ivet . ']' . json_encode($dia_cont) . "<br>";
-                for ($i = 0; $i < count($this->base); $i++) {
-                    echo 'v: ' . json_encode($dia_cont["valores"][$i]['cont']) . "<br>";
-                }
-                print_r("---------------------<br>");
-            }
+            print_r("vetor_datas original: <br>");
+            echo '<pre>';
+            print_r($this->vetor_datas);
+            echo '</pre>';
         }
 
         //EXCLUIR VALORES NULOS
@@ -919,12 +921,12 @@ class ReportController extends BaseController
 
         if ($this->debug == 2) {
             print_r("-------------------------------------------------------------------------------------------<br>");
-            foreach ($this->vetor_datas as $ivet => $dia_cont) {
-                echo '[' . $ivet . ']' . json_encode($dia_cont) . "<br>";
-            }
+            print_r("vetor_datas final: <br>");
+            echo '<pre>';
+            print_r($this->vetor_datas);
+            echo '</pre>';
         }
 
-//        EXIT;
         if ($resolucao != 'minuto') {
             //Fazendo a média logarítmica
             $this->calculaMedia();
@@ -976,7 +978,7 @@ class ReportController extends BaseController
             $retorno_aux["total"] = $this->vetor_datas[$ivet]["valores"][0]['cont'];
 
             if ($this->repeticao == 'semanalmente' || $this->repeticao == 'dias_da_semana')
-                $retorno_aux["date-name"] = $this->dias_da_semana[$ivet];
+                $retorno_aux["date-name"] = $this->dias_da_semana[\Carbon\Carbon::createFromFormat('Y-m-d H:i', $retorno_aux["date"])->dayOfWeek];
 
             if ($this->repeticao == 'hora')
                 $retorno_aux["hour"] = substr($this->vetor_datas[$ivet]['inicio']->data, 11, 5);
@@ -988,6 +990,7 @@ class ReportController extends BaseController
             for ($i = 0; $i < count($this->base); $i++) {
                 $retorno_aux["value" . $i] = $this->vetor_datas[$ivet]["valores"][$i]['valor'];
             }
+
             $JSONretorno[] = $retorno_aux;
         }
 
@@ -1098,7 +1101,12 @@ class ReportController extends BaseController
                     if ($this->debug == 4) echo $CONT . ': FORA(' . $ivalor . ') - indicador: ' . $indicador . '; min: ' . $min . '; max: ' . $max . '; valor: ' . $valor . '<br>';
                 }
             }
-            if ($this->debug == 4) print_r("_VALORES_ = " . implode(', ', $_VALORES_) . "<br>");
+            if ($this->debug == 4) {
+                print_r("_VALORES_:");
+                echo '<pre>';
+                print_r($_VALORES_);
+                echo '</pre>';
+            }
 
             //ESSA CONTA NÃO ESTÁ CORRETA POIS N_VALORES NÃO ESTÁ CONTABILIZANDO SOMENTE OS VALORES, ESTÁ CONTABILIZANDO NULLS TBM
             //VER O PERÍODO (GINASTICO 1 - LCEQ - ALARM SET - IPA / POR MINUTO / 24/10-24/10 / 21:00 - 02:00
@@ -1141,10 +1149,15 @@ class ReportController extends BaseController
                 $MIN = $_VALORES_[$pos[$x]];
                 if ($this->debug == 4) echo '**********MINIMO ATUAL: _VALORES_[' . $pos[$x] . ']: ' . $MIN . '<br>';
                 $x++;
+                if ($this->debug == 4) echo '###### PERCORRENDO _VALORES_ ######<br>';
 
                 for (; $x < count($_VALORES_); $x++) {
-                    if ($this->debug == 4) echo '_VALORES_[' . $pos[$x] . ']: ' . $_VALORES_[$pos[$x]] . '<br>';
-                    if (($_VALORES_[$pos[$x]] < $MIN) && ($_VALORES_[$pos[$x]] != NULL) && ($_VALORES_[$pos[$x]] != "")) {
+                    if ($this->debug == 4) echo '_VALORES_[' . $pos[$x] . ']: ' . $_VALORES_[$pos[$x]] . ' (MIN: ' . $MIN . ')<br>';
+
+//                    -------------- ATUALIZADO 15/05/2017 --------------------
+//                    if (($_VALORES_[$pos[$x]] < $MIN) && ($_VALORES_[$pos[$x]] != NULL) && ($_VALORES_[$pos[$x]] != "")) {
+
+                    if ($_VALORES_[$pos[$x]] < $MIN) {
                         $MIN = $_VALORES_[$pos[$x]];
                         if ($this->debug == 4) echo '*********NOVO MÍNIMO: _VALORES_[' . $pos[$x] . ']: ' . $_VALORES_[$pos[$x]] . '<br>';
                     }
@@ -1169,11 +1182,16 @@ class ReportController extends BaseController
                 ];
 
                 if ($this->debug == 4) echo '------------------------------------------------------<br>';
-                if ($this->debug == 4) echo '_VALORES_[' . $imin . ']: ' . $MIN . '<br>';
-                if ($this->debug == 4) echo '_VALORES_[' . $imax . ']: ' . $MAX . '<br>';
-                if ($this->debug == 4) echo '------------------------------------------------------<br>';
-                if ($this->debug == 4) print_r("MiniMaxMed = " . json_encode($MiniMaxMed[$i]) . "<br>");
-                if ($this->debug == 4) print_r("------------------------------------------------<br>");
+                if ($this->debug == 4) echo 'MIN:[' . $imin . ']: ' . $MIN . '<br>';
+                if ($this->debug == 4) echo 'MAX:[' . $imax . ']: ' . $MAX . '<br>';
+                if ($this->debug == 4) {
+                    print_r("MiniMaxMed:");
+                    echo '<pre>';
+                    print_r($MiniMaxMed[$i]);
+                    echo '</pre>';
+                }
+                if ($this->debug == 4) print_r("------------------------------------------------------------------------------------------------<br>");
+                if ($this->debug == 4) print_r("------------------------------------------------------------------------------------------------<br><br>");
             }
         }
 
@@ -1181,7 +1199,6 @@ class ReportController extends BaseController
         $this->data_minimax = $MiniMaxMed;
 //        print_r($this->vetor_datas);
 //        print_r($MiniMaxMed);
-//        exit;
         return $MiniMaxMed;
     }
 
