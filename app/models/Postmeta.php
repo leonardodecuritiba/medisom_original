@@ -10,6 +10,11 @@ class Postmeta extends Eloquent
     protected $table = 'postmeta';
     protected $primaryKey = 'postmeta_id';
 
+    /**
+     * [get um ou todos registros salvos]
+     * @param  string $key [chave unica]
+     * @return [array/string]      [valor ou valores buscados]
+     */
     static public function get_by($post_id = 0, $key = '')
     {
         if ($key != '') {
@@ -239,16 +244,6 @@ class Postmeta extends Eloquent
 
         $PostmetaORIG->meta_value = json_encode($meta_value);
         return $PostmetaORIG;
-    }
-
-    /**
-     * [get um ou todos registros salvos]
-     * @param  string $key [chave unica]
-     * @return [array/string]      [valor ou valores buscados]
-     */
-    public function decodeMetaKey()
-    {
-        return json_decode($this->meta_value);
     }
 
     public function post()

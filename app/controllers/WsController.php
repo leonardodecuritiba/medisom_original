@@ -38,7 +38,6 @@ class WsController extends BaseController
 //        $nome = Input::get('nome'); //(string) 1 MSOM só pra indicar que é uma strig do nosso sistema
 //        $cliente_id = Input::get('cliente_id'); //(int) 2 ID do cliente
         $sensor_id = Input::get('sensor_id'); //(int) 3 ID do sensor do cliente
-//        $created = str_replace('_', ' ', Input::get('d    ata')); #date('YmdHis'); //(int) 4 2015-02-11_10:15:00  ano mês dia hora min e seg sendo que o segundo sempre deve ser zero e desprezado
         $now = \Carbon\Carbon::now();
         $created = $now->format('Y-m-d H:i:00');
         $last_update = Postmeta::getByMetaKeyValue($sensor_id, 'last_activity', $created)
@@ -96,10 +95,7 @@ class WsController extends BaseController
                 'failover' => $indicadores['failover'],
                 'failenergy' => $indicadores['failenergy']
             );
-            $r = DB::table('sensores_log')->insert($sensor_data);
-
-//        print_r($r);exit;
-
+            DB::table('sensores_log')->insert($sensor_data);
             //Agora vamos atualizar o sensor atual
             Postmeta::update_or_insert(array('post_id' => $sensor_id, 'key' => 'last_activity', 'value' => $created));
 
@@ -123,35 +119,50 @@ class WsController extends BaseController
 
             Sensormeta::update_or_insert($params);
 
+
             //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
-            if ($_SERVER['SERVER_NAME'] != 'teste.medisom.com.br') {
-                //extract data from the post
-                //set POST variables
-                $url = 'http://teste.medisom.com.br/sensor?sensor_id=' . $sensor_id . '&';
-                $fields_string = '';
-                //url-ify the data for the POST
-                // 'created' => $created,
-                unset($sensor_data['created'], $sensor_data['post_id']);
-                foreach ($sensor_data as $key => $value) {
-                    $fields_string .= $key . '=' . $value . '&';
-                }
-                $url = $url . rtrim($fields_string, '&');
-
-//                echo "<br>" . $url;
-                //open connection
-                $ch = curl_init();
-
-                //set the url, number of POST vars, POST data
-                curl_setopt($ch, CURLOPT_URL, $url);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-                //execute post
-//            $html = curl_exec($ch);
-//            $result = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-                curl_close($ch);
-//            dd($html);
+            DB::connection('db_teste')->table('sensores_log')->insert($sensor_data);
+            //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
+            $count = DB::connection('db_teste')->table('postmeta')->where('post_id', $sensor_id)
+                ->where('meta_key', 'last_activity')
+                ->count();
+            if ($count > 0) {
+                DB::connection('db_teste')->table('postmeta')->where('post_id', $sensor_id)
+                    ->where('meta_key', 'last_activity')
+                    ->update(['meta_value' => $created]);
+            } else {
+                DB::connection('db_teste')->table('postmeta')
+                    ->insert([
+                        'post_id' => $sensor_id,
+                        'meta_key' => 'last_activity',
+                        'meta_value' => $created
+                    ]);
             }
 
+            //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
+            $count = DB::connection('db_teste')->table('sensormeta')->where('sensor_id', $params['sensor_id'])
+                ->where('alert_day', $params['alert_day'])
+                ->count();
+            if ($count > 0) {
+                DB::connection('db_teste')->table('sensormeta')->where('sensor_id', $params['sensor_id'])
+                    ->where('alert_day', $params['alert_day'])
+                    ->update([
+                        'last_activity' => $params['last_activity'],
+                        'last_values' => json_encode($params['last_values']),
+                        'alert_day' => $params['alert_day']
+                    ]);
+            } else {
+                DB::connection('db_teste')->table('sensormeta')
+                    ->insert([
+                        'sensor_id' => $params['sensor_id'],
+                        'alert_count' => 0,
+                        'last_activity' => $params['last_activity'],
+                        'last_values' => json_encode($params['last_values']),
+                        'alert_day' => $params['alert_day']
+                    ]);
+            }
+        } else {
+            echo 'SensorLog already been updated at: ' . $created;
         }
 
         exit;
