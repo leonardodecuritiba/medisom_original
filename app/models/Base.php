@@ -47,7 +47,7 @@ class Base
         'la10' => ['nome' => 'Ruído de Conversação', 'escala' => 'dB', 'faixa' => ['min' => 30, 'max' => 130], 'tipo' => 'float'],
         'alarm_set' => ['nome' => 'Alame Set', 'escala' => 'dB', 'faixa' => ['min' => 30, 'max' => 130], 'tipo' => 'float'],
         'ipa' => ['nome' => 'IPA', 'escala' => 's', 'faixa' => ['min' => 0, 'max' => 100], 'tipo' => 'int'],
-        'time_leq' => ['nome' => 'Tempo de Leq', 'escala' => 'seg', 'faixa' => ['min' => 0, 'max' => 30], 'tipo' => 'int'],
+        'time_leq' => ['nome' => 'Tempo de Leq', 'escala' => 's', 'faixa' => ['min' => 0, 'max' => 30], 'tipo' => 'int'],
         'temp' => ['nome' => 'Temperatura', 'escala' => 'ºC', 'faixa' => ['min' => 0, 'max' => 50], 'tipo' => 'float'],
         'ilum' => ['nome' => 'Iluminação', 'escala' => 'LUX', 'faixa' => ['min' => 0, 'max' => 65000], 'tipo' => 'int'],
         'umid' => ['nome' => 'Umidade', 'escala' => '%', 'faixa' => ['min' => 0, 'max' => 100], 'tipo' => 'int'],

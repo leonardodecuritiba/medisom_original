@@ -34,7 +34,7 @@ class WsController extends BaseController
 
     public function ws()
     {
-        //http://localhost/workana/medisom/sensor?nome=MSOM&sensor_id=52&data=2016-08-16_16:08:32&laeq=150&lceq=40.0&la90=47.9&la50=45.3&la10=41.3&lamax=58.2&lamin=41.0&tempo_leq=5&alarme_set=55&ipa=90&failover=1
+        //http://medisom.com.br/sensor?nome=MSOM&sensor_id=171&laeq=150&lceq=40.0&la90=47.9&la50=45.3&la10=41.3&lamax=58.2&lamin=41.0&tempo_leq=5&alarme_set=55&ipa=90&failover=1
 //        $nome = Input::get('nome'); //(string) 1 MSOM só pra indicar que é uma strig do nosso sistema
 //        $cliente_id = Input::get('cliente_id'); //(int) 2 ID do cliente
         $sensor_id = Input::get('sensor_id'); //(int) 3 ID do sensor do cliente
@@ -43,7 +43,6 @@ class WsController extends BaseController
         $created = $now->format('Y-m-d H:i:00');
         $last_update = Postmeta::getByMetaKeyValue($sensor_id, 'last_activity', $created)
             ->first();
-//        return count($last_update);
         if (count($last_update) == 0) {
 
             $last_sensormeta = Sensormeta::where('sensor_id', $sensor_id)->orderBy('last_activity', 'desc')->first();
@@ -110,18 +109,19 @@ class WsController extends BaseController
             foreach ($ids_sensors as $id) {
                 $retorno .= "sensor_id=" . $id . ";sdcard=1\n";
             }
-            echo $retorno;
+            if ($_SERVER['SERVER_NAME'] != 'teste.medisom.com.br') {
+                echo $retorno;
+            }
 
             //Atualizar a sensormeta
-            $alert_day = substr($created, 0, 10);
             $params = [
                 'sensor_id' => $sensor_id,
                 'last_activity' => $created,
-                'last_values' => json_encode($indicadores),
-                'alert_day' => $alert_day
+                'last_values' => $indicadores,
+                'alert_day' => $now->format('Y-m-d')
             ];
-            $sensormeta = Sensormeta::update_or_insert($params);
 
+            Sensormeta::update_or_insert($params);
 
             //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
             if ($_SERVER['SERVER_NAME'] != 'teste.medisom.com.br') {
@@ -137,7 +137,7 @@ class WsController extends BaseController
                 }
                 $url = $url . rtrim($fields_string, '&');
 
-                echo "<br>" . $url;
+//                echo "<br>" . $url;
                 //open connection
                 $ch = curl_init();
 
