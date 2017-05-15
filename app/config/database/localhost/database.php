@@ -54,7 +54,7 @@ return array(
         'mysql' => array(
             'driver' => 'mysql',
             'host' => 'localhost',
-            'database' => 'medisom_site',
+            'database' => 'medisom_db',
             'username' => 'root',
             'password' => '',
             'charset' => 'utf8',
