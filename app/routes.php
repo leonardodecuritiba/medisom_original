@@ -46,7 +46,7 @@ Route::group(array('before' => 'auth'), function () {
 
     //************************************************************ Relatórios **********************************************************
     Route::any('admin/relatorios/{post_id?}/{type?}', array('as' => 'admin.report', 'uses' => 'AdminController@report'));
-    Route::any('admin/relatorio-customizado/{action?}/{post_id?}', array('as' => 'admin.report-custom', 'uses' => 'AdminController@report_custom'));
+    Route::any('admin/relatorio-customizado/{post_id?}/{action?}', array('as' => 'admin.report-custom', 'uses' => 'AdminController@report_custom'));
 //    Route::any('admin/relatorio-customizado/{action?}/{post_id?}', array('as' => 'route-admin.reports.manual', 'uses' => 'AdminController@report_custom'));
 
     //************************************************************ Sensores ************************************************************

@@ -12,21 +12,6 @@ class AdminController extends BaseController
         }
     }
 
-    static public function report($post_id, $graficos)
-    {
-        $query = DB::table('posts')->where('post_id', $post_id)
-            ->where('type', 'sensor')->where('status', 'publish');
-        if (Auth::user()->group_id == 1) {
-            $sensor = $query->first();
-        } else {
-            $sensor = $query->where('post_author', Auth::id())->first();
-        }
-
-        return View::make('admin.report.report-details', array(
-            'sensor' => $sensor,
-            'Graficos' => ReportController::getGrupoIndicadoresStr($graficos)));
-    }
-
     static public function report_manual($post_id, $type)
     {
 
@@ -106,30 +91,19 @@ class AdminController extends BaseController
         print_r(json_encode($dataReport));
     }
 
-    public function dashboard()
+    static public function report($post_id, $graficos)
     {
-
-        if (Auth::user()->group_id == 2) {
-            $query = Post::where('type', 'sensor')
-                ->where('post_author', Auth::user()->parent);
-        } else if (Auth::user()->group_id == 1) {
-            $query = Post::where('type', 'sensor');
+        $query = DB::table('posts')->where('post_id', $post_id)
+            ->where('type', 'sensor')->where('status', 'publish');
+        if (Auth::user()->group_id == 1) {
+            $sensor = $query->first();
         } else {
-            $query = Post::where('type', 'sensor')
-                ->where('post_author', Auth::id());
+            $sensor = $query->where('post_author', Auth::id())->first();
         }
-        $sensores = $query->where('status', 'publish')
-            ->orderBy('post_id', 'desc')
-            ->get();
 
-        $sms = $this->SMSAPI_initialize();
-        $Colors = ReportController::$Colors;
-        #$this->SMSAPI_enviar('554888394340', 'Medisom - teste de envio sms');
-
-//        $sensores = BaseController::getDataSensors($sensores);
-//        $sensores = $sensores[0];
-//        return $sensores;
-        return View::make('admin.dashboard', array('sensores' => $sensores, 'sms' => $sms, 'Colors' => $Colors, 'DashboardPeriods' => array_slice(Base::$_DASHBOARD_PERIODS_, 0, 5), 'Indicadores' => Base::$_INDICADORES_));
+        return View::make('admin.report.report-details', array(
+            'sensor' => $sensor,
+            'Graficos' => self::getGrupoIndicadoresStr($graficos)));
     }
 
 //    public function alerts($alert_id = 0, $action = '')
@@ -179,6 +153,105 @@ class AdminController extends BaseController
 //        }
 //        return View::make($route, $array_response);
 //    }
+
+    static public function report_custom($post_id = 0, $action = 'view')
+    {
+        //NOVO OU UPDATE
+        if (Request::isMethod('post')) {
+            $dados_input = Input::all();
+            ReportController::create_or_update_Report($dados_input);
+            return Redirect::route('admin.report-custom');
+        }
+
+        if (Auth::user()->group_id == 1) {
+            $sensores = Post::where('type', 'sensor')->where('status', 'publish')->get();
+        } else {
+            $sensores = Post::where('type', 'sensor')->where('status', 'publish')->where('post_author', Auth::id())->get();
+        }
+
+        $report_options = [
+            'colors' => ReportController::$Colors,
+//            'dias_da_semana' => ReportController::$DiasDaSemana,
+            'dias_da_semana' => Base::$_DIAS_DA_SEMANA_,
+            'indicadores' => Base::$_GRUPOINDICADORES_,
+        ];
+
+        switch ($action) {
+            case 'novo':
+                return View::make('admin.report-custom', array(
+                    'title' => 'Agendar Relatório',
+                    'sensores' => $sensores,
+                    'report_options' => $report_options,
+                    'action' => $action,
+                    'post_id' => $post_id));
+                break;
+            case 'manual':
+                $report_options['indicadores'] = Base::$_INDICADORES_;
+                return View::make('admin.report-custom', array(
+                    'title' => 'Gerar Relatório',
+                    'report_options' => $report_options,
+                    'sensores' => $sensores,
+                    'action' => $action,
+                    'post_id' => $post_id));
+                break;
+            case 'remover':
+                if (ReportController::removeReport($post_id)) {
+                    Session::flash('alert-code', 'REP003S');
+                } else {
+                    Session::flash('alert-code', 'REP003D');
+                }
+                return Redirect::route('admin.report-custom');
+                break;
+            case 'editar':
+                $reports = DB::table('posts')->where('post_id', $post_id)->first();
+//                $reports = Post::where('post_id', $post_id)->first();
+                break;
+            case 'todos': //Visualizar todos (ADMIN)
+                if (Auth::user()->group_id == 1) {
+                    $reports = DB::table('posts')->where('type', 'report')->get();
+                } else {
+                    $reports = DB::table('posts')->where('type', 'report')->where('post_author', Auth::id())->get();
+                }
+                break;
+            default: //Visualizar todos
+                $reports = DB::table('posts')->where('type', 'report')->where('post_author', Auth::id())->get();
+                break;
+        }
+        return View::make('admin.report-custom', array(
+            'title' => 'Relatórios Agendados',
+            'reports' => $reports,
+            'report_options' => $report_options,
+            'sensores' => $sensores,
+            'action' => $action,
+            'post_id' => $post_id));
+
+    }
+
+    public function dashboard()
+    {
+
+        if (Auth::user()->group_id == 2) {
+            $query = Post::where('type', 'sensor')
+                ->where('post_author', Auth::user()->parent);
+        } else if (Auth::user()->group_id == 1) {
+            $query = Post::where('type', 'sensor');
+        } else {
+            $query = Post::where('type', 'sensor')
+                ->where('post_author', Auth::id());
+        }
+        $sensores = $query->where('status', 'publish')
+            ->orderBy('post_id', 'desc')
+            ->get();
+
+        $sms = $this->SMSAPI_initialize();
+        $Colors = ReportController::$Colors;
+        #$this->SMSAPI_enviar('554888394340', 'Medisom - teste de envio sms');
+
+//        $sensores = BaseController::getDataSensors($sensores);
+//        $sensores = $sensores[0];
+//        return $sensores;
+        return View::make('admin.dashboard', array('sensores' => $sensores, 'sms' => $sms, 'Colors' => $Colors, 'DashboardPeriods' => array_slice(Base::$_DASHBOARD_PERIODS_, 0, 5), 'Indicadores' => Base::$_INDICADORES_));
+    }
 
     public function share($method)
     {
@@ -1302,6 +1375,29 @@ class AdminController extends BaseController
         }
     }
 
+    /*
+    public function test_sensor()
+    {
+        /*
+        $sensor = Post::find($sensor_id);
+        $sensors = BaseController::getDataSensors($sensor);
+        $user = User::find($sensor->post_author);
+        $authors = User::all(['user_id', 'name']);
+        $route = 'admin.sensors-single';
+        $array_response = [
+            'sensor' => $sensor,
+            'user' => $user,
+            'title' => 'Editar Sensor',
+            'authors' => $authors,
+            'GrupoIndicadores' => Base::$_GRUPOINDICADORES_,
+            'Indicadores' => Base::$_INDICADORES_
+        ];
+
+        return View::make($route, $array_response);
+
+    }
+    */
+
     public function profile($action = '')
     {
         if ($action == 'save') {
@@ -1335,78 +1431,6 @@ class AdminController extends BaseController
         }
 
         return View::make('admin.profile');
-    }
-
-    public function report_custom($action = 'view', $post_id = 0)
-    {
-        //NOVO OU UPDATE
-        if (Request::isMethod('post')) {
-            $dados_input = Input::all();
-            ReportController::create_or_update_Report($dados_input);
-            return Redirect::route('admin.report-custom');
-        }
-
-        if (Auth::user()->group_id == 1) {
-            $sensores = Post::where('type', 'sensor')->where('status', 'publish')->get();
-        } else {
-            $sensores = Post::where('type', 'sensor')->where('status', 'publish')->where('post_author', Auth::id())->get();
-        }
-
-        $report_options = [
-            'colors' => ReportController::$Colors,
-//            'dias_da_semana' => ReportController::$DiasDaSemana,
-            'dias_da_semana' => Base::$_DIAS_DA_SEMANA_,
-            'indicadores' => Base::$_GRUPOINDICADORES_,
-        ];
-
-        switch ($action) {
-            case 'novo':
-                return View::make('admin.report-custom', array(
-                    'title' => 'Agendar Relatório',
-                    'sensores' => $sensores,
-                    'report_options' => $report_options,
-                    'action' => $action,
-                    'post_id' => $post_id));
-                break;
-            case 'manual':
-                $report_options['indicadores'] = Base::$_INDICADORES_;
-                return View::make('admin.report-custom', array(
-                    'title' => 'Gerar Relatório',
-                    'report_options' => $report_options,
-                    'sensores' => $sensores,
-                    'action' => $action,
-                    'post_id' => $post_id));
-                break;
-            case 'remover':
-                if (ReportController::removeReport($post_id)) {
-                    Session::flash('alert-code', 'REP003S');
-                } else {
-                    Session::flash('alert-code', 'REP003D');
-                }
-                return Redirect::route('admin.report-custom');
-                break;
-            case 'editar':
-                $reports = DB::table('posts')->where('type', 'report')->where('post_id', $post_id)->first();
-                break;
-            case 'todos': //Visualizar todos (ADMIN)
-                if (Auth::user()->group_id == 1) {
-                    $reports = DB::table('posts')->where('type', 'report')->get();
-                } else {
-                    $reports = DB::table('posts')->where('type', 'report')->where('post_author', Auth::id())->get();
-                }
-                break;
-            default: //Visualizar todos
-                $reports = DB::table('posts')->where('type', 'report')->where('post_author', Auth::id())->get();
-                break;
-        }
-        return View::make('admin.report-custom', array(
-            'title' => 'Relatórios Agendados',
-            'reports' => $reports,
-            'report_options' => $report_options,
-            'sensores' => $sensores,
-            'action' => $action,
-            'post_id' => $post_id));
-
     }
 
     public function sensors($post_id = 0, $action = '')
@@ -1611,29 +1635,6 @@ class AdminController extends BaseController
 //        return View::make('admin.sensors', array('sensors' => $sensors, 'title' => 'Sensores'));
     }
 
-    /*
-    public function test_sensor()
-    {
-        /*
-        $sensor = Post::find($sensor_id);
-        $sensors = BaseController::getDataSensors($sensor);
-        $user = User::find($sensor->post_author);
-        $authors = User::all(['user_id', 'name']);
-        $route = 'admin.sensors-single';
-        $array_response = [
-            'sensor' => $sensor,
-            'user' => $user,
-            'title' => 'Editar Sensor',
-            'authors' => $authors,
-            'GrupoIndicadores' => Base::$_GRUPOINDICADORES_,
-            'Indicadores' => Base::$_INDICADORES_
-        ];
-
-        return View::make($route, $array_response);
-
-    }
-    */
-
     public function teste_report()
     {
 
@@ -1683,7 +1684,91 @@ class AdminController extends BaseController
                 'Data_report' => $data_report));
         }
     }
-
-
+//
+//    static public function report_custom($action = 'view', $post_id = 0)
+//    {
+//        //NOVO OU UPDATE
+//        if (Request::isMethod('post')) {
+//            $dados_input = Input::all();
+//            ReportController::create_or_update_Report($dados_input);
+//            return Redirect::route('admin.report-custom');
+//        }
+//
+//        if (Auth::user()->group_id == 1) {
+//            $sensores = Post::where('type', 'sensor')->where('status', 'publish')->get();
+//        } else {
+//            $sensores = Post::where('type', 'sensor')->where('status', 'publish')->where('post_author', Auth::id())->get();
+//        }
+//
+//        $report_options = [
+//            'colors' => ReportController::$Colors,
+////            'dias_da_semana' => ReportController::$DiasDaSemana,
+//            'dias_da_semana' => Base::$_DIAS_DA_SEMANA_,
+//            'indicadores' => Base::$_GRUPOINDICADORES_,
+//        ];
+//
+//        switch ($action) {
+//            case 'novo':
+//                return View::make('admin.report-custom', array(
+//                    'title' => 'Agendar Relatório',
+//                    'sensores' => $sensores,
+//                    'report_options' => $report_options,
+//                    'action' => $action,
+//                    'post_id' => $post_id));
+//                break;
+//            case 'manual':
+//                $report_options['indicadores'] = Base::$_INDICADORES_;
+//                return View::make('admin.report-custom', array(
+//                    'title' => 'Gerar Relatório',
+//                    'report_options' => $report_options,
+//                    'sensores' => $sensores,
+//                    'action' => $action,
+//                    'post_id' => $post_id));
+//                break;
+//            case 'remover':
+//                if (ReportController::removeReport($post_id)) {
+//                    Session::flash('alert-code', 'REP003S');
+//                } else {
+//                    Session::flash('alert-code', 'REP003D');
+//                }
+//                return Redirect::route('admin.report-custom');
+//                break;
+//            case 'editar':
+//                $reports = DB::table('posts')->where('type', 'report')->where('post_id', $post_id)->first();
+//                break;
+//            case 'todos': //Visualizar todos (ADMIN)
+//                if (Auth::user()->group_id == 1) {
+//                    $reports = DB::table('posts')->where('type', 'report')->get();
+//                } else {
+//                    $reports = DB::table('posts')->where('type', 'report')->where('post_author', Auth::id())->get();
+//                }
+//                break;
+//            default: //Visualizar todos
+//                $reports = DB::table('posts')->where('type', 'report')->where('post_author', Auth::id())->get();
+//                break;
+//        }
+//        return View::make('admin.report-custom', array(
+//            'title' => 'Relatórios Agendados',
+//            'reports' => $reports,
+//            'report_options' => $report_options,
+//            'sensores' => $sensores,
+//            'action' => $action,
+//            'post_id' => $post_id));
+//
+//    }
+//    static public function report($post_id, $graficos)
+//    {
+//        $query = DB::table('posts')->where('post_id', $post_id)
+//            ->where('type', 'sensor')->where('status', 'publish');
+//        if (Auth::user()->group_id == 1) {
+//            $sensor = $query->first();
+//        } else {
+//            $sensor = $query->where('post_author', Auth::id())->first();
+//        }
+//
+//        return View::make('admin.report.report-details', array(
+//            'sensor' => $sensor,
+//            'Graficos' => ReportController::getGrupoIndicadoresStr($graficos)));
+//    }
 }
 

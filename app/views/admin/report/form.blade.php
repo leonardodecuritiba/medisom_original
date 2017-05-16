@@ -14,6 +14,10 @@ if ($action == 'novo') {
 } else if ($action == 'editar') {
     $selected_sensor = $report->sensor_post_id;
     $selected_indicadores = $report->content;
+
+//    print_r('<pre>');
+//    print_r($report);
+//    print_r('</pre>');
 }
 ?>
 
@@ -155,6 +159,10 @@ if ($action == 'novo') {
                 <input type="text" id="time-picker-to" class="form-control" name="report_exe_interval_hora[fim]"
                        value="{{isset($report)?$report->report_exe_interval->$key->fim:'23:59'}}">
             </div>
+            <div class="col-sm-2">
+                <label for="report" class="control-label">Próxima execução</label>
+                <p class="text-danger">{{$report->report_exe_calendar}}</p>
+            </div>
             {{--<div class="col-sm-10 report_specific_repetition_XXXXX hide">--}}
             {{--<label for="report" class="control-label">Todas as semanas, no mesmo horário, no(s) dia(s) <span class="text-danger">*</span></label><br>--}}
             {{--@foreach($dias as $key => $dia)--}}
@@ -167,7 +175,7 @@ if ($action == 'novo') {
         <div class="col-md-12">
             <hr>
         </div>
-        <div class="col-sm-12">
+        <div class="col-sm-10">
             @if((isset($report) && User::allowed('route-admin.reports.update')) || (User::allowed('route-admin.reports.create')))
                 <button name="submit" type="submit" class="add_report btn btn-default">Salvar Relatório</button>
             @endif
