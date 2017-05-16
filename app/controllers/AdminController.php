@@ -103,7 +103,7 @@ class AdminController extends BaseController
 
         return View::make('admin.report.report-details', array(
             'sensor' => $sensor,
-            'Graficos' => self::getGrupoIndicadoresStr($graficos)));
+            'Graficos' => ReportController::getGrupoIndicadoresStr($graficos)));
     }
 
 //    public function alerts($alert_id = 0, $action = '')
