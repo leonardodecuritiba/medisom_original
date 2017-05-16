@@ -296,14 +296,14 @@
                         @if(Auth::user()->group_id == 1) {{--Admin--}}
                         <li class="@if(Route::is('admin.alertas.todos')) active @endif">
                             <a href="{{route('admin.alertas.todos')}}">
-                                <span class="text">Todos os Alertas</span>
+                                <span class="text">Todos Alertas</span>
                             </a>
                         </li>
                         @endif
                         @if(User::allowed('route-admin.alertas.index'))
                             <li class="@if(Route::is('admin.alertas.index')) active @endif">
                                 <a href="{{route('admin.alertas.index')}}">
-                                    <span class="text">Listar Alertas</span>
+                                    <span class="text">Meus Alertas</span>
                                 </a>
                             </li>
                         @endif

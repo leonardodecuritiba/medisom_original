@@ -75,9 +75,9 @@ class AlertController extends BaseController
         $alerts = $user->alerts_user();
         $route = 'admin.alerts';
         $array_response = array(
-            'action' => 'Listar Alertas',
+            'action' => 'Meus Alertas',
             'alerts' => $alerts,
-            'title' => 'Listar Alertas'
+            'title' => 'Meus Alertas'
         );
         return View::make($route, $array_response);
     }
