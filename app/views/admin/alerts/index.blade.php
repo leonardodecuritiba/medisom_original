@@ -9,19 +9,24 @@
                 <th width="2%">ID</th>
                 <th width="3%">Status</th>
                 @if ( Auth::user()->group_id == 1)
-                    <th width="10%">Usuário</th>
+                    <th width="10%">Autor</th>
                 @endif
                 <th width="10%">Nome</th>
-                <th width="20%">Sensor</th>
-                <th width="12%">Condição</th>
+                <th width="10%">Sensor</th>
+                <th width="10%">Condição</th>
                 <th width="10%">Indicadores</th>
-                <th width="12%">Horário</th>
-                <th width="20%">Ações</th>
+                <th>Horário</th>
+                <th colspan="3">Ações</th>
             </tr>
             </thead>
             <tbody>
             @if( count($alerts) > 0 )
                 @foreach($alerts as $alert)
+                    <?php
+                    //                    echo "<pre>";
+                    //                    print_r($alert->sensor_id);
+                    //                    echo "</pre>";
+                    ?>
                     <tr>
                         <td>{{$alert->alert_id}}</td>
                         @if($alert->status==1)
@@ -34,11 +39,11 @@
                             </td>
                         @endif
                         @if ( Auth::user()->group_id == 1)
-                            {{--<td>{{$alert->author($alert->sensor)}}</td>--}}
-                            <td>{{$alert->author($alert->sensor->post_author)->name}}</td>
+                            <td>{{$alert->author_name()}}</td>
                         @endif
                         <td>{{$alert->nome}}</td>
-                        <td>{{$alert->sensor->title}}</td>
+                        {{--<td>{{$alert->sensor->title}}</td>--}}
+                        <td>{{$alert->sensor['title']}}</td>
                         <td>{{$alert->condicao['print']}}</td>
                         <td>{{$alert->indicador['print']}}</td>
                         <td>{{$alert->horario['print']}}</td>

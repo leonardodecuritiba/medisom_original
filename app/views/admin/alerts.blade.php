@@ -53,7 +53,8 @@
                             @include('admin.alerts.form')
                         </form>
                     @else
-                        Sensor inativo! Ative o sensor para editar o alerta.
+                        Sensor inativo! Ative o sensor para editar o alerta. <a href="{{route('admin.alertas.index')}}">Ver
+                            lista de Alertas.</a>
                     @endif
                 @elseif($action == 'logs')
                     @include('admin.alerts.logs')

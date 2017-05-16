@@ -132,6 +132,11 @@ class Post extends Eloquent
     {
         $post = Post::where('post_id', '=', $post_id);
         $post->delete();
+        $Alerts = Alerts::where('sensor_id', '=', $post_id)->get();
+        foreach ($Alerts as $alert) {
+            $alert->delete();
+        }
+        $post->delete();
 
         return true;
     }

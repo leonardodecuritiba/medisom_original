@@ -254,12 +254,23 @@ class Alerts extends Eloquent
 
     public function admin()
     {
-        return $this->belongsTo('User', 'user_id');
+        return $this->belongsTo('User', 'admin_id', 'user_id');
     }
 
     public function sensor()
     {
         return $this->belongsTo('Post', 'sensor_id', 'post_id');
+    }
+
+    public function author_name()
+    {
+        if ($this->admin_id != NULL) {
+            $name = $this->admin->name . ' (Admin)';
+        } else {
+            $owner = User::find($this->sensor['post_author']);
+            $name = $owner['name'];
+        }
+        return $name;
     }
 
     public function sensor_author($user_id)
