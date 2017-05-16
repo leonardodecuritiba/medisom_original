@@ -335,7 +335,7 @@
                         class="submenu collapse @if(Route::currentRouteName() == 'admin.report' || Route::currentRouteName() == 'admin.report-custom') in @endif">
                         @if(Auth::user()->group_id == 1) {{--Admin--}}
                         <li class="@if(strrpos(Request::url(), 'admin/relatorio-customizado/todos') && !strrpos(Request::url(), 'novo') && !strrpos(Request::url(), 'manual')) active @endif">
-                            <a href="{{URL::route('admin.report-custom',array('action'=>'todos'))}}">
+                            <a href="{{URL::route('admin.report-custom',array('post_id' =>0, 'action'=>'todos'))}}">
                                 <span class="text">Todos Relatórios</span>
                             </a>
                         </li>
@@ -349,14 +349,14 @@
                         @endif
                         @if(User::allowed('route-admin.reports.create'))
                             <li class="@if(strrpos(Request::url(), 'admin/relatorio-customizado/novo')) active @endif">
-                                <a href="{{URL::route('admin.report-custom',array('action'=>'novo'))}}">
+                                <a href="{{URL::route('admin.report-custom',array('post_id' =>0, 'action'=>'novo'))}}">
                                     <span class="text">Agendar Relatório</span>
                                 </a>
                             </li>
                         @endif
                         @if(User::allowed('route-admin.reports.manual'))
                             <li class="@if(strrpos(Request::url(), 'admin/relatorio-customizado/manual')) active @endif">
-                                <a href="{{URL::route('admin.report-custom',array('action'=>'manual'))}}">
+                                <a href="{{URL::route('admin.report-custom',array('post_id' =>0, 'action'=>'manual'))}}">
                                     <span class="text">Gerar Relatório</span>
                                 </a>
                             </li>
