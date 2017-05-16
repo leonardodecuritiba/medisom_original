@@ -293,11 +293,20 @@
                     </a>
                     <!-- START 2nd Level Menu -->
                     <ul id="alerts" class="submenu collapse @if(strrpos(Request::url(), 'alertas')) in @endif">
-                        <li class="@if(Route::is('admin.alertas.index')) active @endif">
-                            <a href="{{route('admin.alertas.index')}}">
+                        @if(Auth::user()->group_id == 1) {{--Admin--}}
+                        <li class="@if(Route::is('admin.alertas.todos')) active @endif">
+                            <a href="{{route('admin.alertas.todos')}}">
                                 <span class="text">Todos os Alertas</span>
                             </a>
                         </li>
+                        @endif
+                        @if(User::allowed('route-admin.alertas.index'))
+                            <li class="@if(Route::is('admin.alertas.index')) active @endif">
+                                <a href="{{route('admin.alertas.index')}}">
+                                    <span class="text">Listar Alertas</span>
+                                </a>
+                            </li>
+                        @endif
                         @if(User::allowed('route-admin.alertas.create'))
                             <li class="@if(Route::is('admin.alertas.create')) active @endif">
                                 <a href="{{route('admin.alertas.create')}}">

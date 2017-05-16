@@ -72,16 +72,24 @@ class AlertController extends BaseController
     public static function index()
     {
         $user = Auth::user();
-        if ($user->is_admin()) {
-            $alerts = Alerts::all();
-        } else {
-            $alerts = $user->alerts_user();
-        }
+        $alerts = $user->alerts_user();
+        $route = 'admin.alerts';
+        $array_response = array(
+            'action' => 'Listar Alertas',
+            'alerts' => $alerts,
+            'title' => 'Listar Alertas'
+        );
+        return View::make($route, $array_response);
+    }
+
+    public static function listAll()
+    {
+        $alerts = Alerts::all();
         $route = 'admin.alerts';
         $array_response = array(
             'action' => 'Todos Alertas',
             'alerts' => $alerts,
-            'title' => 'Alertas'
+            'title' => 'Todos Alertas',
         );
         return View::make($route, $array_response);
     }

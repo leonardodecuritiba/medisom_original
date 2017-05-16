@@ -64,6 +64,7 @@ Route::group(array('before' => 'auth'), function () {
     //************************************************************ Alertas ************************************************************
     Route::group(['prefix' => 'admin'], function () {
         Route::resource('alertas', 'AlertController');
+        Route::get('listar/todos-alertas', array('as' => 'admin.alertas.todos', 'uses' => 'AlertController@listAll'));
         Route::get('status/alertas/{id}', array('as' => 'admin.alertas.status', 'uses' => 'AlertController@status'));
         Route::get('zerar/alertas/{id}', array('as' => 'admin.alertas.zerar', 'uses' => 'AlertController@zerar'));
         Route::get('log/alertas', array('as' => 'admin.alertas.logs', 'uses' => 'AlertController@logs'));
