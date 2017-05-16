@@ -141,6 +141,11 @@ class User extends Eloquent implements UserInterface, RemindableInterface
         return Alerts::whereIn('sensor_id', $this->sensors->lists('post_id'))->where('admin_id', NULL)->get();
     }
 
+    public function alerts_admin()
+    {
+        return Alerts::where('admin_id', $this->user_id)->get();
+    }
+
     public function alerts()
     {
         return $this->hasMany('Alerts', 'admin_id');

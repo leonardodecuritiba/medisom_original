@@ -159,10 +159,12 @@ if ($action == 'novo') {
                 <input type="text" id="time-picker-to" class="form-control" name="report_exe_interval_hora[fim]"
                        value="{{isset($report)?$report->report_exe_interval->$key->fim:'23:59'}}">
             </div>
-            <div class="col-sm-2">
-                <label for="report" class="control-label">Próxima execução</label>
-                <p class="text-danger">{{$report->report_exe_calendar}}</p>
-            </div>
+            @if(isset($report))
+                <div class="col-sm-2">
+                    <label for="report" class="control-label">Próxima execução</label>
+                    <p class="text-danger">{{$report->report_exe_calendar}}</p>
+                </div>
+            @endif
             {{--<div class="col-sm-10 report_specific_repetition_XXXXX hide">--}}
             {{--<label for="report" class="control-label">Todas as semanas, no mesmo horário, no(s) dia(s) <span class="text-danger">*</span></label><br>--}}
             {{--@foreach($dias as $key => $dia)--}}

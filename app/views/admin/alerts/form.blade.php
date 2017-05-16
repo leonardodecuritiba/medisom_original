@@ -427,7 +427,8 @@
 //            max: 240,
             value: '{{$valor_sensor_inactive}}',
             slide: function (event, ui) {
-                $(this).prev().val(ui.value);
+                $(this).siblings('input[name=tempo_inativo]').val(ui.value);
+//                $(this).prev().val(ui.value);
             }
         });
     });
