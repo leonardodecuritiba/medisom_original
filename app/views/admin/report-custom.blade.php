@@ -41,7 +41,8 @@
                 <!--/ panel heading/header -->
                 @if($action == 'novo')
                     <div class="col-xs-12 col-md-12">
-                        <form action="{{URL::route('admin.report-custom',array('action'=>'novo'))}}" name="form-reports"
+                        <form action="{{URL::route('admin.report-custom',array('action'=>'novo','post_id'=>0))}}"
+                              name="form-reports"
                               method="post" id="form-reports">
                             @include('admin.report.form')
                         </form>

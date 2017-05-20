@@ -37,7 +37,7 @@ class Sensormeta extends Eloquent
     {
         extract($params, EXTR_OVERWRITE);
 
-        $sensormeta = Sensormeta::where('sensor_id', '=', $params['sensor_id'])
+        $Sensormeta = Sensormeta::where('sensor_id', '=', $params['sensor_id'])
             ->where('alert_day', '=', $params['alert_day'])
             ->first();
 
@@ -46,10 +46,10 @@ class Sensormeta extends Eloquent
             $Sensormeta->sensor_id = $params['sensor_id'];
             $Sensormeta->alert_count = 0;
         }
-        $sensormeta->last_activity = $params['last_activity'];
-        $sensormeta->last_values = json_encode($params['last_values']);
-        $sensormeta->alert_day = $params['alert_day'];
-        $sensormeta->save();
+        $Sensormeta->last_activity = $params['last_activity'];
+        $Sensormeta->last_values = json_encode($params['last_values']);
+        $Sensormeta->alert_day = $params['alert_day'];
+        $Sensormeta->save();
 
         return $sensormeta;
     }
