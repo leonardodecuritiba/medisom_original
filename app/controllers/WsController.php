@@ -100,67 +100,71 @@ class WsController extends BaseController
             Postmeta::update_or_insert(array('post_id' => $sensor_id, 'key' => 'last_activity', 'value' => $created));
 
             //Finalizando, respondendo com o retorno das ids dos sensores para o equipamento
-            $ids_sensors = Post::list_id_active_sensors();
-            $retorno = NULL;
-            foreach ($ids_sensors as $id) {
-                $retorno .= "sensor_id=" . $id . ";sdcard=1\n";
-            }
+//            $ids_sensors = Post::list_id_active_sensors();
+//            $retorno = NULL;
+//            foreach ($ids_sensors as $id) {
+//                $retorno .= "sensor_id=" . $id . ";sdcard=1\n";
+//            }
+            $retorno = "sensor_id=" . $sensor_id . ";sdcard=1\n";
+
             if ($_SERVER['SERVER_NAME'] != 'teste.medisom.com.br') {
                 echo $retorno;
-            }
-
-            //Atualizar a sensormeta
-            $params = [
-                'sensor_id' => $sensor_id,
-                'last_activity' => $created,
-                'last_values' => $indicadores,
-                'alert_day' => $now->format('Y-m-d')
-            ];
-
-            Sensormeta::update_or_insert($params);
 
 
-            //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
-            DB::connection('db_teste')->table('sensores_log')->insert($sensor_data);
-            //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
-            $count = DB::connection('db_teste')->table('postmeta')->where('post_id', $sensor_id)
-                ->where('meta_key', 'last_activity')
-                ->count();
-            if ($count > 0) {
-                DB::connection('db_teste')->table('postmeta')->where('post_id', $sensor_id)
+                //Atualizar a sensormeta
+                $params = [
+                    'sensor_id' => $sensor_id,
+                    'last_activity' => $created,
+                    'last_values' => $indicadores,
+                    'alert_day' => $now->format('Y-m-d')
+                ];
+
+                Sensormeta::update_or_insert($params);
+
+
+                //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
+                DB::connection('db_teste')->table('sensores_log')->insert($sensor_data);
+                //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
+                $count = DB::connection('db_teste')->table('postmeta')->where('post_id', $sensor_id)
                     ->where('meta_key', 'last_activity')
-                    ->update(['meta_value' => $created]);
-            } else {
-                DB::connection('db_teste')->table('postmeta')
-                    ->insert([
-                        'post_id' => $sensor_id,
-                        'meta_key' => 'last_activity',
-                        'meta_value' => $created
-                    ]);
+                    ->count();
+                if ($count > 0) {
+                    DB::connection('db_teste')->table('postmeta')->where('post_id', $sensor_id)
+                        ->where('meta_key', 'last_activity')
+                        ->update(['meta_value' => $created]);
+                } else {
+                    DB::connection('db_teste')->table('postmeta')
+                        ->insert([
+                            'post_id' => $sensor_id,
+                            'meta_key' => 'last_activity',
+                            'meta_value' => $created
+                        ]);
+                }
+
+                //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
+                $count = DB::connection('db_teste')->table('sensormeta')->where('sensor_id', $params['sensor_id'])
+                    ->where('alert_day', $params['alert_day'])
+                    ->count();
+                if ($count > 0) {
+                    DB::connection('db_teste')->table('sensormeta')->where('sensor_id', $params['sensor_id'])
+                        ->where('alert_day', $params['alert_day'])
+                        ->update([
+                            'last_activity' => $params['last_activity'],
+                            'last_values' => json_encode($params['last_values']),
+                            'alert_day' => $params['alert_day']
+                        ]);
+                } else {
+                    DB::connection('db_teste')->table('sensormeta')
+                        ->insert([
+                            'sensor_id' => $params['sensor_id'],
+                            'alert_count' => 0,
+                            'last_activity' => $params['last_activity'],
+                            'last_values' => json_encode($params['last_values']),
+                            'alert_day' => $params['alert_day']
+                        ]);
+                }
             }
 
-            //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
-            $count = DB::connection('db_teste')->table('sensormeta')->where('sensor_id', $params['sensor_id'])
-                ->where('alert_day', $params['alert_day'])
-                ->count();
-            if ($count > 0) {
-                DB::connection('db_teste')->table('sensormeta')->where('sensor_id', $params['sensor_id'])
-                    ->where('alert_day', $params['alert_day'])
-                    ->update([
-                        'last_activity' => $params['last_activity'],
-                        'last_values' => json_encode($params['last_values']),
-                        'alert_day' => $params['alert_day']
-                    ]);
-            } else {
-                DB::connection('db_teste')->table('sensormeta')
-                    ->insert([
-                        'sensor_id' => $params['sensor_id'],
-                        'alert_count' => 0,
-                        'last_activity' => $params['last_activity'],
-                        'last_values' => json_encode($params['last_values']),
-                        'alert_day' => $params['alert_day']
-                    ]);
-            }
         } else {
             echo 'SensorLog already been updated at: ' . $created;
         }
