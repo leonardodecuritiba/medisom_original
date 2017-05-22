@@ -41,17 +41,17 @@ class Sensormeta extends Eloquent
             ->where('alert_day', '=', $params['alert_day'])
             ->first();
 
-        if (!isset($sensormeta->exists)) {
+        if (!isset($Sensormeta->exists)) {
             $Sensormeta = new Sensormeta();
             $Sensormeta->sensor_id = $params['sensor_id'];
             $Sensormeta->alert_count = 0;
+            $Sensormeta->alert_day = $params['alert_day'];
         }
         $Sensormeta->last_activity = $params['last_activity'];
         $Sensormeta->last_values = json_encode($params['last_values']);
-        $Sensormeta->alert_day = $params['alert_day'];
         $Sensormeta->save();
 
-        return $sensormeta;
+        return $Sensormeta;
     }
 
     public function getLastValuesAttribute($value)

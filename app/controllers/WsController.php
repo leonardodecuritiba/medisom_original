@@ -119,8 +119,12 @@ class WsController extends BaseController
                     'alert_day' => $now->format('Y-m-d')
                 ];
 
-                Sensormeta::update_or_insert($params);
-
+                $Sensormeta = Sensormeta::update_or_insert($params);
+//                print_r('<pre>');
+//                print_r($Sensormeta);
+//                print_r('</pre>');
+//
+//                exit;
 
                 //------------------------------------- SEND TO TEST BASE ---------------------------------------------------
                 DB::connection('db_teste')->table('sensores_log')->insert($sensor_data);
