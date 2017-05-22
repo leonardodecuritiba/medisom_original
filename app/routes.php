@@ -111,7 +111,7 @@ App::missing(function ($exception) {
 Route::get('get_hour', function () {
     date_default_timezone_set('America/Sao_Paulo');
     $date = new DateTime();
-    return $date->getTimestamp();
+    return $date->format('YmdHi');
 });
 
 //Relatórios
@@ -180,6 +180,38 @@ Route::get('sendemail-alerts', function () {
     return "alerts - Your email has been sent successfully";
 });
 
+Route::get('send-sms-test', function () {
+    $user = User::find(1);
+
+
+    $destino = '55' . $user->usermeta('', $key = 'phones');
+    $mensagem = 'Mensagem de teste enviado por SMS para ' . $user->name;
+
+    echo "enviando sms!<br>";
+    echo "mensagem: " . $mensagem . "!<br>";
+    echo "destinos:";
+
+    print_r('<pre>');
+    print_r($destino);
+    print_r('</pre>');
+
+    $BaseController = new BaseController();
+    $sms_init = $BaseController->SMSAPI_initialize();
+    echo "<br>-- SMSAPI_initialize --";
+    print_r('<pre>');
+    print_r($sms_init);
+    print_r('</pre>');
+
+    exit;
+
+    echo "<br>-- SMSAPI_initialize --";
+    $sms_send = $BaseController->SMSAPI_enviar($destino, $mensagem);
+    print_r('<pre>');
+    print_r($sms_send);
+    print_r('</pre>');
+
+    return "Your SMS has been sent successfully";
+});
 
 //************************************************************ REMOVER ************************************************************
 /*

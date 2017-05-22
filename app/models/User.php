@@ -126,9 +126,9 @@ class User extends Eloquent implements UserInterface, RemindableInterface
 
     //testa se o usuário é admin
 
-    public function usermeta($user_id, $key = '')
+    public function usermeta($user_id = '', $key = '')
     {
-        return Usermeta::get($user_id, $key);
+        return Usermeta::get(($user_id == '') ? $this->user_id : $user_id, $key);
     }
 
     public function sensors()

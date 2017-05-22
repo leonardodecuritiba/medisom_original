@@ -4,11 +4,16 @@
 class BaseController extends Controller
 {
 
-    public $scripts;
-    public $styles;
+    const _API_LOGIN_ = "Medisom";
+    const _API_PWD_ = "902490";
 //    public $smsapi_login = 'Medisom';
 //    public $smsapi_senha = '902490';
 //    public $smsapi_chave = '';
+    const _API_LOGIN_URL_ = "http://app.smsapi.com.br/contas/service.json";
+    const _API_SEND_URL_ = "http://app.smsapi.com.br/mensagens/service.json";
+    public $scripts;
+    public $styles;
+    private $smsapi_chave = '';
 
     static public function setExpense($last_sensormeta, $expense, $now)
     {
@@ -426,31 +431,6 @@ class BaseController extends Controller
         return round($distance * 1.609, 2);
     }
 
-    /**
-     * Setup the layout used by the controller.
-     *
-     * @return void
-     */
-    protected function setupLayout()
-    {
-        if (!is_null($this->layout)) {
-            $this->layout = View::make($this->layout);
-        }
-    }
-
-
-
-    const _API_LOGIN_       = "Medisom";
-    const _API_PWD_         = "Medis902490om";
-    const _API_LOGIN_URL_   = "http://app.smsapi.com.br/contas/service.json";
-    const _API_SEND_URL_    = "http://app.smsapi.com.br/mensagens/service.json";
-    private $smsapi_chave   = '';
-
-    // ******************** FUNCTIONS ******************************
-    function __construct()
-    {
-    }
-
     public function SMSAPI_initialize()
     {
         //login
@@ -459,7 +439,6 @@ class BaseController extends Controller
             'usuario' => self::_API_LOGIN_,
             'senha' => self::_API_PWD_
         ];
-
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, self::_API_LOGIN_URL_);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -468,12 +447,14 @@ class BaseController extends Controller
         $response = json_decode(curl_exec($ch), true);
         if ($response['retorno']['codigo'] == 0) {
             $this->smsapi_chave = $response['retorno']['chave'];
-//            Option::update_or_insert('smsapi_saldo', $response['retorno']['saldo']);
+            Option::update_or_insert('smsapi_saldo', $response['retorno']['saldo']);
             return $response;
         } else {
             return false;
         }
     }
+
+    // ******************** FUNCTIONS ******************************
 
     public function SMSAPI_enviar($destinos, $texto)
     {
@@ -519,5 +500,17 @@ class BaseController extends Controller
     function SMSAPI_shutdown()
     {
 
+    }
+
+    /**
+     * Setup the layout used by the controller.
+     *
+     * @return void
+     */
+    protected function setupLayout()
+    {
+        if (!is_null($this->layout)) {
+            $this->layout = View::make($this->layout);
+        }
     }
 }
