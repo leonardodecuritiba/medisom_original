@@ -315,8 +315,8 @@
                             </li>
                         @endif
                         <li class="@if(Route::is('admin.alertas.logs')) active @endif">
-                            <a href="{{route('admin.alertas.logs')}}">
-                                <span class="text">Log de Alertas</span>
+                            <a href="{{route('admin.notifications')}}">
+                                <span class="text">Notificações</span>
                             </a>
                         </li>
                     </ul>

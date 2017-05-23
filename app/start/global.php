@@ -164,6 +164,9 @@ HTML::macro('alert', function () {
         'ALE003S' => '<h4 class="semibold">Sucesso!</h4> alerta excluído.',
         'ALE003D' => '<h4 class="semibold">Erro!</h4> não foi possível excluir o alerta.',
         'ALE004D' => '<h4 class="semibold">Atenção!</h4> este sensor já emitiu o número máximo de alertas diários.',
+
+        'NOT003S' => '<h4 class="semibold">Sucesso!</h4> Notificação removida.',
+        'NOT003D' => '<h4 class="semibold">Erro!</h4> não foi possível remover a notificação.',
     );
 
     $types = array(

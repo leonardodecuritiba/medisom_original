@@ -209,36 +209,6 @@ class AlertController extends BaseController
         return Redirect::route('admin.alertas.index');
     }
 
-    public static function logs()
-    {
-        $alert_count = 0;
-        if (Auth::user()->group_id == 1) {
-            $alerts = json_decode(Option::get('log_alert_all'));
-        } else {
-            $alerts = json_decode(Option::get('log_alert_' . Auth::id()));
-        }
-        if (count($alerts)) {
-            foreach ($alerts as $alert) {
-                $nlog[] = array('sensor' => $alert->sensor, 'name' => $alert->name, 'value' => $alert->value, 'date' => $alert->date, 'type' => $alert->type, 'read' => true, 'msg' => $alert->msg);
-                $alert_count++;
-            }
-
-            if ($alert_count) {
-                if (Auth::user()->group_id == 1) {
-                    Option::update_or_insert('log_alert_all', json_encode($nlog));
-                } else {
-                    Option::update_or_insert('log_alert_' . Auth::id(), json_encode($nlog));
-                }
-            }
-        }
-        $array_response = array(
-            'alerts' => $alerts,
-            'action' => 'logs',
-            'title' => 'Log de Alertas'
-        );
-        return View::make('admin.alerts', $array_response);
-    }
-
     public static function store()
     {
         $data = Input::all();
@@ -319,26 +289,17 @@ class AlertController extends BaseController
         }
     }
 
-    public function print_log($data)
-    {
-        if ($this->debug) echo '---------------------------';
-        foreach ($data as $key => $value) {
-            if ($this->debug) echo $key . ' = ' . $value . "\n<br>";
-        }
-        if ($this->debug) echo '---------------------------';
-    }
-
-
-
-    //----------------------------------------------------------------------------------------------
-    //------------------------------------ Funções CRUD alertas ------------------------------------
-    //----------------------------------------------------------------------------------------------
-
     public function zera_alert_count()
     {
         $this->Sensormeta->alert_count = 0;
         $this->Sensormeta->save();
     }
+
+
+
+    //----------------------------------------------------------------------------------------------
+    //------------------------------------ Funções RUN alertas -------------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public function run($alerts)
     {
@@ -382,6 +343,18 @@ class AlertController extends BaseController
                 //vamos testar depois
 //            $this->Sensormeta = $this->Post->sensormeta->where('alert_day', $this->date_sensor->date_reduced)
 //                ->first();
+                //se for do tipo inatividade e não existir, então vamos criar um sensormeta para hoje
+                if (!count($this->Sensormeta) > 0 || ($this->Alert->tipo_alerta == 2 && !count($this->Sensormeta) > 0)) {
+                    $params = [
+                        'sensor_id' => $sensor_id,
+                        'last_activity' => $agora->format('Y-m-d H:i:00'),
+                        'last_values' => NULL,
+                        'alert_day' => $agora->format('Y-m-d')
+                    ];
+                    $this->Sensormeta = Sensormeta::update_or_insert($params);
+                }
+
+
 
                 if ($this->debug) {
                     print_r("======================================== Alert ==========================================================");
@@ -398,18 +371,6 @@ class AlertController extends BaseController
                     print_r($this->Sensormeta->toArray());
                     print_r('</pre>');
                 }
-
-                //se for do tipo inatividade e não existir, então vamos criar um sensormeta para hoje
-                if ($this->Alert->tipo_alerta == 2 && !$this->Sensormeta->exists) {
-                    $params = [
-                        'sensor_id' => $sensor_id,
-                        'last_activity' => $agora->format('Y-m-d H:i:00'),
-                        'last_values' => NULL,
-                        'alert_day' => $agora->format('Y-m-d')
-                    ];
-                    $this->Sensormeta = Sensormeta::update_or_insert($params);
-                }
-
 
                 if ($this->Sensormeta->exists) {
                     //se existir, ou seja se possuir dados
@@ -496,28 +457,16 @@ class AlertController extends BaseController
                             if ($this->debug) print_r('</pre>');
                             if ($this->debug) print_r("-----------------------------------------------------------------<br>");
 
+                            $this->print_log($alertar);
                             foreach ($alertar as $ind => $alert_) {
-                                $msg_log[$ind] = '[' . $this->Post->title . '] ' . $alert_['msg'] . ' Alarme emitido às ' . $agora->format('H:i') . ' de ' . $agora->format('d/m/Y') . '.';
-                                // LOG ------------------------------
-                                $log_alert[] = array(
-                                    'sms_log' => $this->sms_send,
-                                    'sensor' => $this->Post->title,
-                                    'name' => $alert_['nome'],
-                                    'value' => $alert_['msg'],
-                                    'date' => $this->date_sensor->data_legivel,
-                                    'type' => 'danger',
-                                    'read' => false,
-                                    'msg' => $msg_log[$ind]);
-                                // /LOG ------------------------------
+                                Notification::create($alert_);
+                                $msg_log[$ind] = '[' . $this->Post->title . '] ' . $alert_['message'];
                             }
 
                             if ($this->debug) print_r('<pre>');
-                            if ($this->debug) print_r($log_alert);
+                            if ($this->debug) print_r($msg_log);
                             if ($this->debug) print_r('</pre>');
 
-                            if (!$this->debug && count($log_alert) > 0) {
-//                                $this->update_log($log_alert);
-                            }
 
                             $msg_email = (count($msg_log) > 1) ? implode('<br>', $msg_log) : $msg_log[0];
                             if ($this->debug) echo 'msg_log = ';
@@ -607,6 +556,10 @@ class AlertController extends BaseController
         return $alertar;
     }
 
+    //----------------------------------------------------------------------------------------------
+    //------------------------------------ Funções CHECK alertas -----------------------------------
+    //----------------------------------------------------------------------------------------------
+
     public function check_alert_fail($valores_indicador)
     {
         //Alerta Falha de Sensor (definição): É quando um Sensor (APARELHO) apresenta algum tipo de falha interna,
@@ -618,9 +571,19 @@ class AlertController extends BaseController
             echo "******* ALERTA FALHA DE SENSOR *******<br>";
             echo "**************************************<br>";
             echo 'failover = ' . $valores_indicador->failover . "<br>";
+
+            $mensagem = [
+                'title' => 'Alarme - Falha do Sensor',
+                'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                'body' => 'Houve uma falha no Sensor, isto acontece quando um Sensor apresenta algum tipo de falha interna, erro de circuito, falha de algum sensor interno, falha eletrônica, etc.',
+            ];
+
             $alertar[] = [
-                'msg' => "Alarme - Falha do Sensor: Houve uma falha no Sensor, isto acontece quando um Sensor apresenta algum tipo de falha interna, erro de circuito, falha de algum sensor interno, falha eletrônica, etc.",
-                'nome' => 'ALERTA FALHA DE SENSOR',
+                'sensor_id' => $this->Alert->sensor_id,
+                'type' => 'danger',
+                'title' => $mensagem['title'],
+                'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
+                'date' => \Carbon\Carbon::now(),
             ];
         }
         if ($this->send_email_sensor) {
@@ -640,9 +603,19 @@ class AlertController extends BaseController
             echo "******* ALERTA FALHA DE ENERGIA *******<br>";
             echo "**************************************<br>";
             echo 'failenergy = ' . $valores_indicador->failenergy . "<br>";
+
+            $mensagem = [
+                'title' => 'Alarme - Falha de Energia do Sensor',
+                'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                'body' => 'Foi detectada uma queda de energia no Sensor.',
+            ];
+
             $alertar[] = [
-                'msg' => "Alarme - Falha de Energia do Sensor: Foi detectada uma queda de energia.",
-                'nome' => 'ALERTA FALHA DE ENERGIA DO SENSOR',
+                'sensor_id' => $this->Alert->sensor_id,
+                'type' => 'danger',
+                'title' => $mensagem['title'],
+                'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
+                'date' => \Carbon\Carbon::now(),
             ];
         }
         if ($this->send_email_sensor) {
@@ -668,10 +641,18 @@ class AlertController extends BaseController
             echo('diff (s): ' . $tempo_diff . "<br>");
             echo "***************************************<br>";
 
+            $mensagem = [
+                'title' => 'Alarme - Sensor Inativo',
+                'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                'body' => 'Última atividade do Sensor foi detectada',
+            ];
+
             $alertar[] = [
-                'msg' => "Alarme - Sensor Inativo: Última atividade do sensor foi detectada às " .
-                    $this->date_sensor->hora . " de " . $this->date_sensor->dia . ".",
-                'nome' => 'ALERTA DE SENSOR INATIVO ',
+                'sensor_id' => $this->Alert->sensor_id,
+                'type' => 'danger',
+                'title' => $mensagem['title'],
+                'message' => $mensagem['body'] . ' em ' . $mensagem['instante'],
+                'date' => \Carbon\Carbon::now(),
             ];
         }
         if ($this->send_email_sensor) {
@@ -682,6 +663,9 @@ class AlertController extends BaseController
 
     public function check_alert_indicator($valores_indicador)
     {
+        if ($valores_indicador == NULL) {
+            return $valores_indicador;
+        }
         $alertar = NULL;
         $condicao = $this->Alert->condicao['condicao'];
         $valores = $this->Alert->condicao['valores'];
@@ -706,72 +690,144 @@ class AlertController extends BaseController
             case 0: //'0' => 'Dentro da faixa',
 //                echo 'CONDIÇÃO: Dentro da faixa <br>';
                 if (($valor_indicador >= $valores['minimo']) && ($valor_indicador <= $valores['maximo'])) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . " entre: " . implode($escala_indicador . ' e ', $valores) . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . " entre: " . implode($escala_indicador . ' e ', $valores) . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
             case 1: //'1' => 'Fora da faixa',
 //                echo 'CONDIÇÃO: Fora da faixa <br>';
                 if (($valor_indicador < $valores['minimo']) || ($valor_indicador > $valores['maximo'])) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . " entre: " . implode($escala_indicador . ' e ', $valores) . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . " entre: " . implode($escala_indicador . ' e ', $valores) . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
             case 2: //'2' => 'Igual a',
 //                echo 'CONDIÇÃO: Igual a <br>';
                 if ($valor_indicador == $valores) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
             case 3: //'3' => 'Diferente de',
 //                echo 'CONDIÇÃO: Diferente de <br>';
                 if ($valor_indicador != $valores) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
             case 4: //'4' => 'Maior que',
 //                echo 'CONDIÇÃO: Maior que <br>';
                 if ($valor_indicador > $valores) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
             case 5: //'5' => 'Maior ou igual a',
 //                echo 'CONDIÇÃO: Maior ou igual a <br>';
                 if ($valor_indicador >= $valores) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
             case 6: //'6' => 'Menor que',
 //                echo 'CONDIÇÃO: Menor que <br>';
                 if ($valor_indicador < $valores) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
             case 7: //'7' => 'Menor ou igual a'
 //                echo 'CONDIÇÃO: Menor ou igual a <br>';
                 if ($valor_indicador <= $valores) {
+                    $mensagem = [
+                        'title' => 'Alarme - Limite Atingido',
+                        'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
+                        'body' => "Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
+                    ];
+
                     $alertar[] = [
-                        'msg' => "Alarme - Limite Atingido: Indicador: " . $nome_indicador . " = " . $valor_indicador . $escala_indicador . "; " . $condicao['valor'] . ": " . $valores . $escala_indicador . '.',
-                        'nome' => $indicador,
+                        'sensor_id' => $this->Alert->sensor_id,
+                        'type' => 'danger',
+                        'title' => $mensagem['title'],
+                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'date' => \Carbon\Carbon::now(),
                     ];
                 }
                 break;
@@ -782,6 +838,19 @@ class AlertController extends BaseController
         }
         return $alertar;
     }
+
+    public function print_log($data)
+    {
+        if ($this->debug) {
+            print_r('<pre>');
+            print_r($data);
+            print_r('</pre>');
+        }
+    }
+
+    //----------------------------------------------------------------------------------------------
+    //------------------------------------ Funções CHECK alertas -----------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public function send_alert($msg)
     {
@@ -895,27 +964,35 @@ class AlertController extends BaseController
 
     //REMOVER (FUNÇÃO INATIVADA EM 27/10/2016)
     //VAMOS CRIAR UMA TABELA chamada alertmeta ??? talvez
-
-    public function update_log($new_log)
-    {
-
-        if ($this->debug) print_r("<br>Escrever log_alert-------------------------------------------------<br>");
-        $this->LOG_alert = $new_log;
-
-        $old_log = json_decode(Option::get('log_alert_' . $this->Post->post_author), true);
-
-        if (is_array($old_log)) {
-            $this->LOG_alert = (count($old_log)) ? array_merge($this->LOG_alert, $old_log) : $this->LOG_alert;
-        }
-//        dd($this->LOG_alert);
-        //$log_alert = array_unique($log_alert);
-        Option::update_or_insert('log_alert_' . $this->Post->post_author, json_encode($this->LOG_alert));
-
-        //atualização do log_all
-        $old_log_all = json_decode(Option::get('log_alert_all'), true);
-        $old_log_all = (count($old_log_all)) ? array_merge($this->LOG_alert, $old_log_all) : $this->LOG_alert;
-        Option::update_or_insert('log_alert_all', json_encode($old_log_all));
-
-        return;
-    }
+//
+//    public function update_log($new_log)
+//    {
+//
+//        exit;
+//        Notification::create([
+//            'sensor_id' => $this->Alert->sensor_id,
+//            'type'      => 'danger',
+//            'title'     => 'Alarme - Limite Atingido',
+//            'message'   => 'Indicador: Nível de Pressão Sonora Pico = 126dB; Maior que: 120dB. Alarme emitido às 23:00 de 22/05/2017',
+//            'date'      => \Carbon\Carbon::now(),
+//        ]);
+//
+//        if ($this->debug) print_r("<br>Escrever log_alert-------------------------------------------------<br>");
+//
+//        $old_log = json_decode(Option::get('log_alert_' . $this->Post->post_author), true);
+//
+//        if (is_array($old_log)) {
+//            $new_log = (count($old_log)) ? array_merge($new_log, $old_log) : $new_log;
+//        }
+////        dd($new_log);
+//        //$log_alert = array_unique($log_alert);
+//        Option::update_or_insert('log_alert_' . $this->Post->post_author, json_encode($new_log));
+//
+//        //atualização do log_all
+//        $old_log_all = json_decode(Option::get('log_alert_all'), true);
+//        $old_log_all = (count($old_log_all)) ? array_merge($new_log, $old_log_all) : $new_log;
+//        Option::update_or_insert('log_alert_all', json_encode($old_log_all));
+//
+//        return;
+//    }
 }

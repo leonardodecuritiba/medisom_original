@@ -1,16 +1,9 @@
 <?php
+
 if (Auth::user()->group_id == 1) {
-    $alerts = json_decode(Option::get('log_alert_all'));
+    $notifications = Notification::getUnreaded();
 } else {
-    $alerts = json_decode(Option::get('log_alert_' . Auth::id()));
-}
-$alert_count = 0;
-if (count($alerts)) {
-    foreach ($alerts as $alert) {
-        if (!$alert->read) {
-            $alert_count++;
-        }
-    }
+    $notifications = Notification::getUnreadedByUser(Auth::user());
 }
 ?>
 <header id="header" class="navbar">
@@ -37,10 +30,10 @@ if (count($alerts)) {
                 </a>
             </li>
             <li class=" custom " id="header-dd-notification">
-                <a href="{{URL::route('admin.alertas.logs')}}">
+                <a href="{{URL::route('admin.notifications')}}">
                     <span class="meta">
                         <span class="icon"><i class="ico-bell"></i></span>
-                        <span class="hasnotification hasnotification-danger label ">{{$alert_count}}</span>
+                        <span class="hasnotification hasnotification-danger label ">{{$notifications->count()}}</span>
                     </span>
                 </a>
             </li>

@@ -63,11 +63,15 @@ Route::group(array('before' => 'auth'), function () {
 
     //************************************************************ Alertas ************************************************************
     Route::group(['prefix' => 'admin'], function () {
+        Route::get('notifications', array('as' => 'admin.notifications', 'uses' => 'AdminController@notifications'));
+        Route::get('notifications/remover/{id}', array('as' => 'admin.notifications.remove', 'uses' => 'AdminController@destroyNotification'));
+    });
+
+    Route::group(['prefix' => 'admin'], function () {
         Route::resource('alertas', 'AlertController');
         Route::get('listar/todos-alertas', array('as' => 'admin.alertas.todos', 'uses' => 'AlertController@listAll'));
         Route::get('status/alertas/{id}', array('as' => 'admin.alertas.status', 'uses' => 'AlertController@status'));
         Route::get('zerar/alertas/{id}', array('as' => 'admin.alertas.zerar', 'uses' => 'AlertController@zerar'));
-        Route::get('log/alertas', array('as' => 'admin.alertas.logs', 'uses' => 'AlertController@logs'));
         //    Route::post('alerts/store', array('as' => 'alerts.store', 'uses' => 'AlertController@store'));
         //    Route::get('alerts/create', array('as' => 'alerts.create', 'uses' => 'AlertController@create'));
         //    Route::get('alerts/{alert_id}/edit', array('as' => 'alerts.edit', 'uses' => 'AlertController@edit'));

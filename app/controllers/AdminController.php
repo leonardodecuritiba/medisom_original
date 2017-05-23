@@ -1379,28 +1379,6 @@ class AdminController extends BaseController
         }
     }
 
-    /*
-    public function test_sensor()
-    {
-        /*
-        $sensor = Post::find($sensor_id);
-        $sensors = BaseController::getDataSensors($sensor);
-        $user = User::find($sensor->post_author);
-        $authors = User::all(['user_id', 'name']);
-        $route = 'admin.sensors-single';
-        $array_response = [
-            'sensor' => $sensor,
-            'user' => $user,
-            'title' => 'Editar Sensor',
-            'authors' => $authors,
-            'GrupoIndicadores' => Base::$_GRUPOINDICADORES_,
-            'Indicadores' => Base::$_INDICADORES_
-        ];
-
-        return View::make($route, $array_response);
-
-    }
-    */
 
     public function profile($action = '')
     {
@@ -1688,6 +1666,91 @@ class AdminController extends BaseController
                 'Data_report' => $data_report));
         }
     }
+
+    public function notifications()
+    {
+        if (Auth::user()->group_id == 1) {
+            $notifications = Notification::all();
+        } else {
+            $notifications = Notification::getByUser(Auth::user());
+            foreach ($notifications as $notification) {
+                $notification->update(['read', 1]);
+            }
+            $notifications = $notifications->get();
+        }
+//        $notifications = Notification::unreaded()->get();
+//        return $notifications;
+
+        $array_response = array(
+            'notifications' => $notifications,
+            'title' => 'Notificações'
+        );
+        return View::make('admin.notifications', $array_response);
+
+    }
+
+    public function destroyNotification($id)
+    {
+        $Notification = Notification::findOrFail($id);
+        if ($Notification->delete()) {
+            Session::flash('alert-code', 'NOT003S');
+        } else {
+            Session::flash('alert-code', 'NOT003D');
+        }
+        return Redirect::route('admin.notifications');
+    }
+//
+//
+//$alert_count = 0;
+//if (Auth::user()->group_id == 1) {
+//$alerts = json_decode(Option::get('log_alert_all'));
+//} else {
+//    $alerts = json_decode(Option::get('log_alert_' . Auth::user()));
+//}
+//
+////        return $alerts;
+//if (count($alerts)) {
+//    foreach ($alerts as $alert) {
+//        $nlog[] = array('sensor' => $alert->sensor, 'name' => $alert->name, 'value' => $alert->value, 'date' => $alert->date, 'type' => $alert->type, 'read' => true, 'msg' => $alert->msg);
+//        $alert_count++;
+//    }
+//
+//    if ($alert_count) {
+//        if (Auth::user()->group_id == 1) {
+//            Option::update_or_insert('log_alert_all', json_encode($nlog));
+//        } else {
+//            Option::update_or_insert('log_alert_' . Auth::id(), json_encode($nlog));
+//        }
+//    }
+//}
+//$array_response = array(
+//    'alerts' => $alerts,
+//    'action' => 'logs',
+//    'title' => 'Notificações'
+//);
+//return View::make('admin.notifications', $array_response);
+    /*
+    public function test_sensor()
+    {
+        /*
+        $sensor = Post::find($sensor_id);
+        $sensors = BaseController::getDataSensors($sensor);
+        $user = User::find($sensor->post_author);
+        $authors = User::all(['user_id', 'name']);
+        $route = 'admin.sensors-single';
+        $array_response = [
+            'sensor' => $sensor,
+            'user' => $user,
+            'title' => 'Editar Sensor',
+            'authors' => $authors,
+            'GrupoIndicadores' => Base::$_GRUPOINDICADORES_,
+            'Indicadores' => Base::$_INDICADORES_
+        ];
+
+        return View::make($route, $array_response);
+
+    }
+    */
 //
 //    static public function report_custom($action = 'view', $post_id = 0)
 //    {

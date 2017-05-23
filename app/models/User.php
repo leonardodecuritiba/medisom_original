@@ -133,7 +133,7 @@ class User extends Eloquent implements UserInterface, RemindableInterface
 
     public function sensors()
     {
-        return $this->hasMany('Post', 'post_author');
+        return $this->hasMany('Post', 'post_author', 'user_id')->where('type', 'sensor');
     }
 
     public function alerts_user()
