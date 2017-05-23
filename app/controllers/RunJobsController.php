@@ -5,22 +5,18 @@ class RunJobsController extends BaseController
 {
 
     //localhost/workana/medisom/verify-reports-run
-    const _DEBUG_ = 0;
 
-
-    static public function run_alert_check()
+    static public function run_alert_check($debug = 0)
     {
         $Alerts = Alerts::where('status', '=', 1)->get();
 
-//        $Alerts = Alerts::where('alert_id', 15)->get();
-
-        $AlertController = new AlertController(self::_DEBUG_);
+        $AlertController = new AlertController($debug);
         $AlertController->run($Alerts);
         print_r("<br>***** FIM DA CHECAGEM DOS ALERTAS ******<br>");
         return;
     }
 
-    static public function run_report_check()
+    static public function run_report_check($debug = 0)
     {
         //localhost/workana/medisom/verify-reports-run
         set_time_limit(360);
@@ -29,14 +25,14 @@ class RunJobsController extends BaseController
         $data_agora = \Carbon\Carbon::now();
         $time_agora = $data_agora->timestamp;
 
-        if (self::_DEBUG_ > 0) print_r("@@@@@@@ CHECAGEM EM DEBUG NÍVEL (" . self::_DEBUG_ . ") @@@@@@@<br>");
+        if ($debug > 0) print_r("@@@@@@@ CHECAGEM EM DEBUG NÍVEL (" . $debug . ") @@@@@@@<br>");
         print_r("***** INÍCIO DA CHECAGEM DOS REPORTS (" . $data_agora->format('Y-m-d H:i') . ") ******<br><br>");
         print_r('REPORTS (ID) = ');
         print_r(json_encode($ids_report));
         print_r("<br>___________________________________________________________<br>");
         print_r("___________________________________________________________<br>");
 
-        if (self::_DEBUG_ > 0) {
+        if ($debug > 0) {
             print_r("****** CHECAGEM EM TESTE ******<br>");
             print_r("___________________________________________________________<br><br>");
         }
@@ -55,7 +51,7 @@ class RunJobsController extends BaseController
             if ($time_report < $time_agora) {
                 print_r("RODAR: " . $report->post->title . "<br>");
 
-                $ReportController = new ReportController($report_id, self::_DEBUG_, 'agendado');
+                $ReportController = new ReportController($report_id, $debug, 'agendado');
 
                 //aqui vamos apenas guardar no banco
                 //na primeira vez, guardar os dados do report no banco: contendo
@@ -92,7 +88,7 @@ class RunJobsController extends BaseController
         print_r("___________________________________________________________<br>");
 
         exit;
-        if (self::_DEBUG_ > 0) {
+        if ($debug > 0) {
             print_r("****** CHECAGEM EM TESTE ******<br>");
             print_r("___________________________________________________________<br><br>");
         }
@@ -110,7 +106,7 @@ class RunJobsController extends BaseController
             //testar se já chegou o prazo de geração
             if ($time_report < $time_agora) {
                 print_r("RODAR: " . $report->title . "<br>");
-                $ReportController = new ReportController($report_id, self::_DEBUG_, 'agendado');
+                $ReportController = new ReportController($report_id, $debug, 'agendado');
 
                 //aqui vamos apenas guardar no banco
                 //na primeira vez, guardar os dados do report no banco: contendo
@@ -133,8 +129,9 @@ class RunJobsController extends BaseController
 
     static public function NEWrun_alert_check()
     {
+        $debug = 0;
         $alerts = Alerts::where('status', '=', 1)->get();
-        $AlertController = new AlertController(self::_DEBUG_);
+        $AlertController = new AlertController($debug);
         $AlertController->run($alerts);
         print_r("<br>***** FIM DA CHECAGEM DOS ALERTAS ******<br>");
         return;
@@ -142,8 +139,9 @@ class RunJobsController extends BaseController
 
     static public function run_report_manual()
     {
+        $debug = 0;
         set_time_limit(180);
-        $ReportController = new ReportController(0, self::_DEBUG_, 'manual');
+        $ReportController = new ReportController(0, $debug, 'manual');
         return $ReportController->fake_report();
     }
 }

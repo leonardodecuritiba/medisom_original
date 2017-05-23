@@ -354,8 +354,6 @@ class AlertController extends BaseController
                     $this->Sensormeta = Sensormeta::update_or_insert($params);
                 }
 
-
-
                 if ($this->debug) {
                     print_r("======================================== Alert ==========================================================");
                     print_r('<pre>');
@@ -480,15 +478,14 @@ class AlertController extends BaseController
                                 if ($this->debug) print_r("Não foi necessário enviar alerta ----------------------------------------------<br>");
                             }
                         } else {
-                            if ($this->debug) print_r("Não foi atingiu as condições necessárias *check_alerts()* para enviar alerta por email/sms ----------------------------------------------<br>");
+                            print_r("<br>EXCEPTION: Não foi atingiu as condições necessárias *check_alerts()* para enviar alerta por email/sms ----------------------------------------------<br>");
                         }
                     }
-
                 } else {
-                    if ($this->debug) print_r("<br>Sensor sem dados na tabela SensoresLog ----------------------------------------------<br>");
+                    print_r("<br>EXCEPTION: Sensor sem dados na tabela SensoresLog ----------------------------------------------<br>");
                 }
             } else {
-                if ($this->debug) print_r("<br>Alerta fora do horário de funcionamento ----------------------------------------------<br>");
+                print_r("<br>EXCEPTION: Alerta fora do horário de funcionamento ----------------------------------------------<br>");
             }
 
             $endtime = microtime(true);
@@ -700,7 +697,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
@@ -718,7 +715,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
@@ -736,7 +733,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
@@ -754,7 +751,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
@@ -772,7 +769,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
@@ -790,7 +787,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
@@ -808,7 +805,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
@@ -826,7 +823,7 @@ class AlertController extends BaseController
                         'sensor_id' => $this->Alert->sensor_id,
                         'type' => 'danger',
                         'title' => $mensagem['title'],
-                        'message' => $mensagem['body'] . '. Em ' . $mensagem['instante'],
+                        'message' => $mensagem['body'] . ' Em ' . $mensagem['instante'],
                         'date' => \Carbon\Carbon::now(),
                     ];
                 }
