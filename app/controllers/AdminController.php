@@ -967,7 +967,10 @@ class AdminController extends BaseController
 
     public function configs()
     {
-
+        $Options = Option::orderBy('parent')
+            ->where('parent', '<>', 999)
+            ->orderBy('order')
+            ->get();
         if (Request::isMethod('post')) {
             foreach (Input::get('update') as $ids) {
                 $configuration = Option::find($ids);
@@ -1019,7 +1022,8 @@ class AdminController extends BaseController
                 }
             }
         }
-        return View::make('admin.configs', array('configs' => Option::orderBy('parent')->where('parent', '<>', 999)->orderBy('order')->get(), 'title' => 'Configurações'));
+
+        return View::make('admin.configs', array('configs' => $Options, 'title' => 'Configurações'));
     }
 
     public function users($user_id = 0, $action = '')
