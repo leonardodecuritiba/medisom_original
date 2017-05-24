@@ -17,3 +17,4 @@ Thumbs.db
 .idea/webServers.xml
 .idea/workspace.xml
 cgi-bin/
+local/database/
