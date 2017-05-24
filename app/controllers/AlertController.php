@@ -311,11 +311,11 @@ class AlertController extends BaseController
             $this->Alert = $alert;
             $sensor_id = $alert->sensor_id;
             $starttime = microtime(true);
-            if ($this->debug) print_r("<br>");
-            if ($this->debug) print_r("------------------------------------------------------------------------------------------------------------------------------------------------------------------------------<br>");
-            if ($this->debug) print_r("<br><br>======================================== Sensor (" . $sensor_id . ") ====================================================<br>");
-            if ($this->debug) print_r("NOME: " . $this->Alert->nome . "<br>");
-            if ($this->debug) print_r("TIPO: (" . $this->Alert->tipo_alerta . ") " . $this->Alert->get_tipoAlerta() . "<br>");
+            print_r("<br>");
+            print_r("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------<br>");
+            print_r("======================================== Sensor/Alert (" . $sensor_id . " / " . $this->Alert->alert_id . ") ============================================================<br>");
+            print_r("NOME: " . $this->Alert->nome . "<br>");
+            print_r("TIPO: (" . $this->Alert->tipo_alerta . ") " . $this->Alert->get_tipoAlerta() . "<br>");
 
             $gate = true; //variável de controle para teste ou não do alerta (na verificação do diahora de funcionamento)
 
@@ -354,24 +354,24 @@ class AlertController extends BaseController
                     $this->Sensormeta = Sensormeta::update_or_insert($params);
                 }
 
-                if ($this->debug) {
-                    print_r("======================================== Alert ==========================================================");
-                    print_r('<pre>');
-                    print_r($this->Alert->toArray());
-                    print_r('</pre>');
-                    print_r("======================================== Post ==========================================================");
-                    print_r('<pre>');
-                    print_r($this->Post->toArray());
-                    print_r('</pre>');
-
-                    print_r("===================================== Sensormeta =========================================================");
-                    print_r('<pre>');
-                    print_r($this->Sensormeta->toArray());
-                    print_r('</pre>');
-                }
-
-                if ($this->Sensormeta->exists) {
+                if (count($this->Sensormeta) > 0) {
                     //se existir, ou seja se possuir dados
+                    if ($this->debug) {
+                        print_r("======================================== Alert ==========================================================");
+                        print_r('<pre>');
+                        print_r($this->Alert->toArray());
+                        print_r('</pre>');
+                        print_r("======================================== Post ==========================================================");
+                        print_r('<pre>');
+                        print_r($this->Post->toArray());
+                        print_r('</pre>');
+
+                        print_r("===================================== Sensormeta =========================================================");
+                        print_r('<pre>');
+                        print_r($this->Sensormeta->toArray());
+                        print_r('</pre>');
+                    }
+
                     $this->Sensormeta->alert_count; // Número de alertas no dia
 
                     $last_activity = new DateTime($this->Sensormeta->last_activity);
@@ -411,12 +411,7 @@ class AlertController extends BaseController
                     if ($this->debug) print_r('SENSOR:alerts_count_' . $this->date_sensor->hoje_reduzido . " = " . $this->Sensormeta->alert_count . "<br>");
                     if ($this->debug) print_r('SENSOR:data_legivel = ' . $this->date_sensor->data_legivel . "<br>");
 
-                    if ($this->Sensormeta->alert_count >= $this->n_alert_max) {
-                        if ($this->debug) print_r("**********************************************************************************<br>");
-                        if ($this->debug) print_r("**************** O número máximo de Alertas emitidos por dia foi atingido ******************<br>");
-                        if ($this->debug) print_r("**********************************************************************************<br>");
-
-                    } else {
+                    if ($this->Sensormeta->alert_count <= $this->n_alert_max) {
 
                         if ($this->debug) print_r("GLOBAL:radio_smtp_send_active = " . $this->radio_smtp_send_active . "<br>");
                         if ($this->debug) print_r("GLOBAL:radio_sms_send_active = " . $this->radio_sms_send_active . "<br>");
@@ -478,20 +473,24 @@ class AlertController extends BaseController
                                 if ($this->debug) print_r("Não foi necessário enviar alerta ----------------------------------------------<br>");
                             }
                         } else {
-                            print_r("<br>EXCEPTION: Não foi atingiu as condições necessárias *check_alerts()* para enviar alerta por email/sms ----------------------------------------------<br>");
+                            $this->print_exception("Não atingiu as condições necessárias em *check_alerts()* para enviar alerta por email/sms");
                         }
+                    } else {
+                        $this->print_exception("O número máximo de Alertas emitidos por dia foi atingido");
                     }
                 } else {
-                    print_r("<br>EXCEPTION: Sensor sem dados na tabela SensoresLog ----------------------------------------------<br>");
+                    $this->print_exception("Sensor sem Sensormeta, ou seja, sem dados na tabela SensoresLog");
                 }
             } else {
-                print_r("<br>EXCEPTION: Alerta fora do horário de funcionamento ----------------------------------------------<br>");
+                $this->print_exception("Alerta fora do horário de funcionamento");
             }
 
             $endtime = microtime(true);
             if ($this->debug) print_r("Tempo =  " . ($endtime - $starttime) . " ----------------------------------------------<br>");
         }
         $endtime = microtime(true);
+        print_r("<br><br>-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------<br>");
+        print_r("-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------<br>");
         print_r("TempoMASTER =  " . ($endtime - $starttimeMASTER) . " ----------------------------------------------<br>");
     }
 
@@ -536,18 +535,25 @@ class AlertController extends BaseController
 
     public function check_alerts($tipo_alerta)
     {
+        $alertar = NULL;
         switch ($tipo_alerta) {
             case 0: // 'Falha de Sensor',
-                $alertar = $this->check_alert_fail($this->Sensormeta->last_values);
+                if ($this->Sensormeta->last_values != NULL) {
+                    $alertar = $this->check_alert_fail($this->Sensormeta->last_values);
+                }
                 break;
             case 1: // 'Falha de Energia',
-                $alertar = $this->check_alert_energy($this->Sensormeta->last_values);
+                if ($this->Sensormeta->last_values != NULL) {
+                    $alertar = $this->check_alert_energy($this->Sensormeta->last_values);
+                }
                 break;
             case 2: // 'Sensor Inativo',
                 $alertar = $this->check_alert_inactive();
                 break;
             case 3: // 'Valor de Indicador'
-                $alertar = $this->check_alert_indicator($this->Sensormeta->last_values);
+                if ($this->Sensormeta->last_values != NULL) {
+                    $alertar = $this->check_alert_indicator($this->Sensormeta->last_values);
+                }
                 break;
         }
         return $alertar;
@@ -661,9 +667,6 @@ class AlertController extends BaseController
 
     public function check_alert_indicator($valores_indicador)
     {
-        if ($valores_indicador == NULL) {
-            return $valores_indicador;
-        }
         $alertar = NULL;
         $condicao = $this->Alert->condicao['condicao'];
         $valores = $this->Alert->condicao['valores'];
@@ -846,10 +849,6 @@ class AlertController extends BaseController
         }
     }
 
-    //----------------------------------------------------------------------------------------------
-    //------------------------------------ Funções CHECK alertas -----------------------------------
-    //----------------------------------------------------------------------------------------------
-
     public function send_alert($msg)
     {
         if ($this->debug) print_r("------------------EMAIL-SMS-----------------------------<br>");
@@ -872,6 +871,10 @@ class AlertController extends BaseController
         if (!$this->debug) $this->update_alert_count();
         if ($this->debug) print_r("---------------------------------------------------------------<br>");
     }
+
+    //----------------------------------------------------------------------------------------------
+    //------------------------------------ Funções CHECK alertas -----------------------------------
+    //----------------------------------------------------------------------------------------------
 
     public function send_email($msg, $subject)
     {
@@ -957,6 +960,11 @@ class AlertController extends BaseController
         if ($this->debug) print_r("update_alert_count = " . $this->Sensormeta->alert_count . "<br>");
         if ($this->debug) print_r("---------------------------------------------------------------<br>");
         $this->Sensormeta->save();
+    }
+
+    private function print_exception($message)
+    {
+        print_r("<br>********** EXCEPTION: " . $message . " ************************************<br>");
     }
 
 
