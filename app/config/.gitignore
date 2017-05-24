@@ -1,2 +1,4 @@
 database.php
-/database/
+database/localhost/database.php
+database/medisom/database.php
+database/teste/database.php
