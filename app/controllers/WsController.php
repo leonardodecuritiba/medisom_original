@@ -66,8 +66,8 @@ class WsController extends BaseController
             $indicadores['expensed'] = $expense['expensed'];//(int) 11- Consumo de Energia Elétrica (diário)
             $indicadores['expensem'] = $expense['expensem']; //(int) 11- Consumo de Energia Elétrica (mês)
             $indicadores['water'] = Input::get('water'); //(decimal) 10,1 - Consumo de Água
-            $indicadores['failover'] = Input::get('failover'); //(int) 15- falha de sensor
-            $indicadores['failenergy'] = Input::get('failenergy'); //(int) 15- falha de sensor por falta de energia
+            $indicadores['failover'] = (Input::has('failover') && (Input::get('failover') != NULL)) ? Input::get('failover') : 0; //(int) 15- falha de sensor por falta de energia
+            $indicadores['failenergy'] = (Input::has('failenergy') && (Input::get('failenergy') != NULL)) ? Input::get('failenergy') : 0; //(int) 15- falha de sensor por falta de energia
 
             $sensor_data = array(
                 'post_id' => $sensor_id,

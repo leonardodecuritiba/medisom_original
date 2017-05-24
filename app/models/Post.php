@@ -265,17 +265,12 @@ class Post extends Eloquent
 
     public function last_sensormeta()
     {
-        return $this->sensormetas()->first();
+        return $this->sensormetas->first();
 //        ->where('alert_day', $hoje->format('Y-m-d'))
 //        ->first();
     }
 
     /* ********************* REPORT ********************* */
-
-    public function sensormetas()
-    {
-        return $this->hasMany('Sensormeta', 'sensor_id', 'post_id');
-    }
 
     public function dashboard()
     {
@@ -285,6 +280,11 @@ class Post extends Eloquent
     public function sensormeta()
     {
         return $this->sensormetas()->orderBy('last_activity', 'dsc');
+    }
+
+    public function sensormetas()
+    {
+        return $this->hasMany('Sensormeta', 'sensor_id', 'post_id');
     }
 
     public function terms($object_id, $term_taxonomy_id)

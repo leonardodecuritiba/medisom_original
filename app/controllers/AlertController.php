@@ -572,7 +572,8 @@ class AlertController extends BaseController
             $mensagem = [
                 'title' => 'Alarme - Falha do Sensor',
                 'instante' => $this->now->format('H:i') . ' de ' . $this->now->format('d/m/Y'),
-                'body' => 'Houve uma falha no Sensor, isto acontece quando um Sensor apresenta algum tipo de falha interna, erro de circuito, falha de algum sensor interno, falha eletrônica, etc.',
+                'body' => 'Houve uma falha no Sensor, isto acontece quando um Sensor apresenta algum tipo de falha interna, erro de circuito, 
+                falha de algum sensor interno, falha eletrônica, remoção do microfone.',
             ];
 
             $alertar[] = [

@@ -89,31 +89,34 @@ class SensorController extends \BaseController
     /**
      * Show the form for creating a new resource.
      *
-     * @param  int $id
+     * @param  int $sensor_id
      * @return Response
      */
-    public function testSensor($id)
+    public function testSensor($sensor_id)
     {
-        $created = \Carbon\Carbon::now()->toDateTimeString();
+        $now = \Carbon\Carbon::now();
+        $created = $now->toDateTimeString();
         $indicadores = Request::all();
         unset($indicadores['_token'], $indicadores['post_id']);
 
         $sensores_log = $indicadores;
-        $sensores_log['post_id'] = $id;
+        $sensores_log['post_id'] = $sensor_id;
         $sensores_log['created'] = $created;
-        $r = DB::table('sensores_log')->insert($sensores_log);
+        DB::table('sensores_log')->insert($sensores_log);
 
-        //Agora vamos atualizar o sensor atual
-        Postmeta::update_or_insert(array('post_id' => $id, 'key' => 'last_activity', 'value' => $created));
-
-        $alert_day = substr($created, 0, 10);
-        $params = [
-            'sensor_id' => $id,
+        Postmeta::update_or_insert(array(
+                'post_id' => $sensor_id,
+                'key' => 'last_activity',
+                'value' => $created)
+        );
+        //Atualizar a sensormeta
+        Sensormeta::update_or_insert([
+            'sensor_id' => $sensor_id,
             'last_activity' => $created,
-            'last_values' => json_encode($indicadores),
-            'alert_day' => $alert_day
-        ];
-        $sensormeta = Sensormeta::update_or_insert($params);
+            'last_values' => $indicadores,
+            'alert_day' => $now->format('Y-m-d')
+        ]);
+
         Session::flash('alert-code', 'SEN006S');
         return Redirect::route('admin.sensores.index');
     }
