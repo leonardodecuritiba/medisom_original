@@ -257,9 +257,13 @@
 <!--/ END Template Main -->
 @include('admin.parts.modal')
 <!-- START Template Footer -->
+
+{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.def.js' )}}
+{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.widget.js' )}}
 @include('admin.parts.footer')
 <!--/ END Template Footer -->
 <script>
+
     $(document).ready(function () {
         $('select[name=dash_period]').change(function () {
             $(this).parent('form').submit();

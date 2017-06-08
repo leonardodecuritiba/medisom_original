@@ -24,19 +24,6 @@
 {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/jqueryTree/qubit.js' )}}
 {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/jqueryTree/jqueryTree.js' )}}
 
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.def.js' )}}
-
-@if(Route::currentRouteName() == 'admin.dashboard')
-    {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.widget.js' )}}
-@endif
-
-@if((Route::currentRouteName() == 'admin.report'))
-    {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.report.js' )}}
-    {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/dateformat/jquery-dateFormat.min.js' )}}
-    {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.details.js' )}}
-    {{--                {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.full.js' )}}--}}
-@endif
-
 
 @if((Route::currentRouteName() == 'ws') || (Route::currentRouteName() == 'teste.report'))
     {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/dateformat/jquery-dateFormat.min.js' )}}

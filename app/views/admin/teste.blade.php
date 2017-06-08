@@ -87,7 +87,6 @@
 
 @include('admin.parts.modal')
 
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.def.js' )}}
 <!-- START Template Footer -->
 @include('admin.parts.footer')
 <!--/ END Template Footer -->

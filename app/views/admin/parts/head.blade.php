@@ -40,7 +40,7 @@
     <script type="text/javascript"> {{ 'var Ajax = '}} {{$Ajax}} </script>
 @endif
 
-@if( Option::get('textarea_custom_scripts') )
-    {{ Option::get('textarea_custom_scripts') }}
-@endif
+{{--@if( Option::get('textarea_custom_scripts') )--}}
+{{--{{ Option::get('textarea_custom_scripts') }}--}}
+{{--@endif--}}
 

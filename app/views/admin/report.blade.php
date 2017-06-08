@@ -127,16 +127,6 @@
                 <hr>
         @endforeach
     @endif
-
-    <!--
-                <div class="row">
-                    <div class="col-md-12">
-                        
-                        <div id="chart-31" class="charts" data-names="laeq,lceq" data-title="Laeq x Lceq" data-postid="31"></div>
-
-                    </div>
-                </div>
-                -->
     </div>
     <!--/ END Template Container -->
 
@@ -148,6 +138,11 @@
 <!--/ END Template Main -->
 @include('admin.parts.modal')
 <!-- START Template Footer -->
+{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.def.js' )}}
+{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.report.js' )}}
+{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.details.js' )}}
+{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/dateformat/jquery-dateFormat.min.js' )}}
+
 @include('admin.parts.footer')
 <!--/ END Template Footer -->
 </body>
