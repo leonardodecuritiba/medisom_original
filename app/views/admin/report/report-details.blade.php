@@ -9,6 +9,7 @@
     <meta name="description" content="Medisom">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     @include('admin.parts.head')
+
 </head>
 <!--/ END Head -->
 

@@ -120,7 +120,7 @@ function layout_relatorio($REPORT_GLOBAL) {
             },
             description: {
                 fontSize: 10,
-                color: "#CCCCCC",
+                color: "#555555",
                 margin: [0, 5, 0, 0]
             },
             safetyDistance: {

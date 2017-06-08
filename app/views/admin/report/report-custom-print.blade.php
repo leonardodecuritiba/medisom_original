@@ -18,20 +18,29 @@ $REPORT_DATA = $REPORT['DATA'];
     <title>{{$title}} | Medisom</title>
     <meta name="description" content="Medisom">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, report-scalable=no">
+    {{ HTML::style('public/themes/'.Option::get('theme_site').'/stylesheet/bootstrap.css') }}
+    {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/vendor.js' )}}
 
-{{ HTML::style('public/themes/'.Option::get('theme_site').'/stylesheet/bootstrap.css') }}
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/vendor.js' )}}
+    {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/amcharts.js' )}}
+    {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/serial.js' )}}
+    {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/plugins/export/export.js' )}}
+    {{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/plugins/export/export.css' )}}
 
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/amcharts.js' )}}
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/serial.js' )}}
-
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/plugins/export/export.js' )}}
-{{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/amcharts/plugins/export/export.css' )}}
-
-<!-- START Template Footer -->
     {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.def.js' )}}
     {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/backend/charts/amcharts.report.js' )}}
     {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/dateformat/jquery-dateFormat.min.js' )}}
+
+
+    {{--{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/amstock.js' )}}--}}
+    {{--{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/pie.js' )}}--}}
+
+    {{--{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/amcharts.js' )}}--}}
+    {{--{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/serial.js' )}}--}}
+
+    {{--{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/plugins/export/export.js' )}}--}}
+    {{--{{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/amcharts/plugins/export/export.css' )}}--}}
+
+    {{--<!-- START Template Footer -->--}}
     <style>
         .btn-huge {
             padding-top: 20px;

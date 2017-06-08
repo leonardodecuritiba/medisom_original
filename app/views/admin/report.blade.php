@@ -9,8 +9,14 @@
     <meta name="description" content="Medisom">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
-
     @include('admin.parts.head')
+    {{--{{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/amcharts/style.css' )}}--}}
+    {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/amcharts.js' )}}
+    {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/serial.js' )}}
+    {{--{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/amstock.js' )}}--}}
+    {{--{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/pie.js' )}}--}}
+    {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/plugins/export/export.js' )}}
+    {{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/amcharts_v3.21.2/amcharts/plugins/export/export.css' )}}
 
 </head>
 <!--/ END Head -->

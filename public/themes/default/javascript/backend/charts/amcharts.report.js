@@ -28,7 +28,7 @@ function findThatBody(obj) {
 function createReport($report_local, callback) {
     var pdf_layout = layout_relatorio($report_local); // global reference from layouts/layout_1.js
 
-    console.log(pdf_layout);
+    console.log($report_local.amchart.export);
     // Capture the current state of the chart
     $report_local.amchart.export.capture({}, function () {
         // Export to PNG

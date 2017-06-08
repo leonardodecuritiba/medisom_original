@@ -1173,9 +1173,11 @@ class ReportController extends BaseController
                     'base' => $Indicadores[$indicador]['nome'],
                     'escala' => $Indicadores[$indicador]['escala'],
                     'min' => $MIN,
-                    'data_min' => $this->vetor_datas[$imin]['inicio']->data . ':00', //PARA FUNCIONAR NO JAVASCRIPT
+//                    'data_min' => $this->vetor_datas[$imin]['inicio']->data . ':00', //RETIRADO EM 30/05
+                    'data_min' => $this->vetor_datas[$imin]['fim']->data . ':00', //PARA FUNCIONAR NO JAVASCRIPT
                     'max' => $MAX,
-                    'data_max' => $this->vetor_datas[$imax]['inicio']->data . ':00',
+//                    'data_max' => $this->vetor_datas[$imax]['inicio']->data . ':00', //RETIRADO EM 30/05
+                    'data_max' => $this->vetor_datas[$imax]['fim']->data . ':00',
                     'med' => $MEDIA,
                     'acum' => $ACUMULADO,
                     'acum_p' => $ACUMULADO_PERCENTUAL,
@@ -1568,6 +1570,7 @@ class ReportController extends BaseController
         if ($this->debug == 1) print_r("---------------------------------------------------------------<br>");
         if ($this->debug == 1) print_r('$this->range_data_inicial = ' . $this->range_data_inicial->format('d/m/Y H:i') . "<br>");
         if ($this->debug == 1) print_r('$this->range_data_final = ' . $this->range_data_final->format('d/m/Y H:i') . "<br>");
+        if ($this->debug == 1) print_r('$this->repeticao = ' . $this->repeticao . "<br>");
         //Próxima data em que o relatório será agendado
         if ($this->debug == 1) print_r("---------------------------------------------------------------<br>");
 
@@ -1581,7 +1584,6 @@ class ReportController extends BaseController
         /* ===========================================================*/
         //Setando o Vetor de datas (dia) inicial e final do relatório será agendado
 //        $this->setVetorDatas();
-//        print_r($this->vetor_datas);exit;
         $this->vetor_datas = [];
 
         switch ($this->repeticao) {
@@ -1622,8 +1624,8 @@ class ReportController extends BaseController
         }
 
         if ($this->repeticao != 'semanal') {
-
             $daterange = new DatePeriod($this->range_data_inicial, new DateInterval($resolucao), $this->range_data_final);
+
             $ix = 0;
             //for ($cont = clone $this->range_data_inicial; $cont <= $this->range_data_final; $cont->add(new DateInterval($resolucao))) {
             foreach($daterange as $cont){
@@ -1652,9 +1654,10 @@ class ReportController extends BaseController
                     case 'periodo':
                         //final
                         $cont_fim->add(new DateInterval($resolucao));
-                        if ($this->intervalo->valor->inicio->h > $this->intervalo->valor->final->h) {
-                            $cont_fim->add(new DateInterval($resolucao));
-                        }
+
+//                        if ($this->intervalo->valor->inicio->h > $this->intervalo->valor->final->h) {
+//                            $cont_fim->add(new DateInterval($resolucao));
+//                        }
                         //se a hora de inicio for maior que a hora fim, isso significa que e periodo noturno
                         //SE FOR MINUTO A MINUTO, NAO HA INTERVALO
                         break;
@@ -1702,6 +1705,7 @@ class ReportController extends BaseController
                     'valores' => $valores,
                 ];
                 $this->vetor_datas[] = $var;
+
             }
         } else {
             $interval = new DateInterval('P1D');
@@ -1928,10 +1932,14 @@ class ReportController extends BaseController
                 $this->vetor_datas = $vetor_datas;
             }
 
-//            PRINT_R($this->vetor_datas);EXIT;
 
             $JSONreport['data'] = $this->montaRetorno();
             $JSONreport['minimax'] = $this->calculaMiniMax(); //contem minimo, maximo (com suas posioes) e a média,
+
+//            print_r('<pre>');
+//            print_r($this->vetor_datas);
+//            print_r('</pre>');
+//            exit;
             $JSONreport['graph_options'] = $this->graph_options;
             $JSONreport['tipo'] = 'data';
             $JSONreport['dados_report'] = $this->get_dados_report('manual');

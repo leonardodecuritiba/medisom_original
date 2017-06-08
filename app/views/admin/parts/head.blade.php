@@ -27,26 +27,14 @@
 
 {{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/summernote/css/summernote.css' )}}
 
-
 <!-- modernizr script -->
 {{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/modernizr/js/modernizr.js') }}
 <!--/ modernizr script -->
 {{ HTML::style('public/themes/'.Option::get('theme_site').'/stylesheet/custom.css') }}
 <!-- END STYLESHEETS -->
-{{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/amcharts/style.css' )}}
 
 {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/vendor.js' )}}
 {{ HTML::script('public/themes/'.Option::get('theme_site').'/javascript/core.js' )}}
-
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/amcharts.js' )}}
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/serial.js' )}}
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/amstock.js' )}}
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/pie.js' )}}
-
-{{ HTML::script('public/themes/'.Option::get('theme_site').'/plugins/amcharts/plugins/export/export.js' )}}
-{{ HTML::style('public/themes/'.Option::get('theme_site').'/plugins/amcharts/plugins/export/export.css' )}}
-
-
 
 @if(count($Ajax)>0)
     <script type="text/javascript"> {{ 'var Ajax = '}} {{$Ajax}} </script>
